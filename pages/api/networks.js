@@ -1,0 +1,223 @@
+const dataSource = [
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+    {
+        name: 'net1.com',
+        consensus: 'etcdRaft',
+        orderers: [ 'orderer1.net1.com' ],
+        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
+    },
+    {
+        name: 'net2.com',
+        consensus: 'solo',
+        orderers: [ 'orderer1.net2.com' ],
+        organizations: [ 'org1.net2.com', 'org2.net2.com' ],
+    },
+].map((net, idx) => ({ key: idx, ...net }));
+
+export default (req, res) => {
+    res.status(200)
+        .json(dataSource);
+}
