@@ -5,6 +5,7 @@ import { menus } from 'config/menus';
 
 import MenuSider from "components/MenuSider/MenuSider";
 import MenuHeader from "components/MenuHeader/MenuHeader";
+import ContentLoader from "components/ContentLoader/ContentLoader";
 import { Scrollbars } from 'react-custom-scrollbars';
 
 const MenuLayout = ({ ribbon, children }) => {
@@ -22,8 +23,8 @@ const MenuLayout = ({ ribbon, children }) => {
                             <Layout.Content style={{ marginTop: '20px' }}>
                                 {
                                     ribbon ?
-                                        <Badge.Ribbon text={ribbon}><Card>{ children }</Card></Badge.Ribbon> :
-                                        <Card>{ children }</Card>
+                                        <Badge.Ribbon text={ribbon}><Card><ContentLoader>{ children }</ContentLoader></Card></Badge.Ribbon> :
+                                        <Card><ContentLoader>{ children }</ContentLoader></Card>
                                 }
                             </Layout.Content>
                         </Layout>
