@@ -1,14 +1,14 @@
-import {Button, Typography} from 'antd';
+import MenuLayout from "components/MenuLayout/MenuLayout";
+import { Typography } from 'antd';
 
 const { Title } = Typography;
 
-const TestAntd = () => {
+export default function Index() {
     return (
-        <>
-            <Button> Test </Button>
-            <Title>It is just a test for antd less files.</Title>
-        </>
-    )
-};
-
-export default TestAntd;
+        <MenuLayout ribbon={"WIP"}>
+            <div style={{textAlign: 'center'}}>
+                <Title>Index Page</Title>
+            </div>
+        </MenuLayout>
+    );
+}
