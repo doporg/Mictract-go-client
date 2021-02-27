@@ -1,5 +1,5 @@
 import MenuLayout from "components/MenuLayout/MenuLayout";
-import {Button, Input, Table} from "antd";
+import {Button, Input, message, Table} from "antd";
 import { useEffect, useState } from 'react';
 import api from 'api';
 import globalStyle from '../index.less';
@@ -76,7 +76,18 @@ const NetworkPage = () => {
 
     const handleSubmit = () => {
         setDrawerVisible(false);
+        const key = 'create network';
+        message.loading({ content: "Creating new network", key });
         // TODO: interactions
+
+        setTimeout(() => {
+            const error = (new Date()) % 2 === 0;
+            if (error) {
+                message.success({ content: "The network has been created", key });
+            } else {
+                message.error({ content: "Error occurred when creating network", key });
+            }
+        }, 2000);
     }
 
     return (
