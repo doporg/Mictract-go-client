@@ -20,8 +20,8 @@ const MenuHeader = () => {
 
     return (
         <Header className={["header", style.header]}>
+            <EnvironmentOutlined style={{color: 'white', margin: 'auto 10px auto 0'}}/>
             <Breadcrumb className={style.breadcrumb} separator=">">
-                <EnvironmentOutlined style={{color: 'white'}}/>
                 {
                     handle(menuKeys)
                 }

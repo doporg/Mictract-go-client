@@ -16,9 +16,7 @@ const MenuLayout = ({ ribbon, children }) => {
                 <MenuSider menus={menus} />
                 <Layout>
                     <MenuHeader />
-                    <Scrollbars
-                        autoHide
-                    >
+                    <Scrollbars autoHide universal >
                         <Layout id={"content-holder"} style={{ padding: '0 24px' }}>
                             <Layout.Content style={{ marginTop: '20px' }}>
                                 {
