@@ -1,10 +1,8 @@
-import {Typography, Button, Card, Col, Divider, Drawer, Form, Input, InputNumber, Row, Select, Slider, Switch} from "antd";
+import {Button, Col, Drawer, Form, InputNumber, Row, Select, Slider, Switch} from "antd";
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import {useState} from "react";
 import * as R from 'ramda';
 import PeerCountTable from "../PeerCountTable/PeerCountTable";
-
-const { Title } = Typography;
 
 const NetworkDrawer = ({ onClose, visible, handleSubmit }) => {
     const [ network, setNetwork ] = useState({

@@ -33,28 +33,27 @@ const renderMenus = (menu) => {
 };
 
 const MenuSider = ({ menus }) => {
-    // TODO: extract style
     const router = useRouter();
     const [ selectedKey, ...openKeys ] = getMenuKeysByPathname(router.pathname)
 
     return (
         <Sider width={200}>
-            <div style={{display:'flex', flexFlow:'column', height:'100%'}}>
+            <div className={style.siderContent}>
                 <Header className="header" >
                     <p className={style.appName}>Mictract</p>
                 </Header>
-                    <Menu
-                        mode="inline"
-                        defaultSelectedKeys={[selectedKey]}
-                        defaultOpenKeys={openKeys}
-                        style={{ height: '100%', borderRight: 0 }}
-                    >
-                        {
-                            menus
-                                .filter(m => m.parentKey === undefined)
-                                .map(renderMenus)
-                        }
-                    </Menu>
+                <Menu
+                    mode="inline"
+                    defaultSelectedKeys={[selectedKey]}
+                    defaultOpenKeys={openKeys}
+                    className={style.menu}
+                >
+                    {
+                        menus
+                            .filter(m => m.parentKey === undefined)
+                            .map(renderMenus)
+                    }
+                </Menu>
             </div>
         </Sider>
     );

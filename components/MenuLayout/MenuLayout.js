@@ -7,18 +7,27 @@ import MenuSider from "components/MenuSider/MenuSider";
 import MenuHeader from "components/MenuHeader/MenuHeader";
 import ContentLoader from "components/ContentLoader/ContentLoader";
 import { Scrollbars } from 'react-custom-scrollbars';
+import style from './MenuLayout.less';
 
 const MenuLayout = ({ ribbon, children }) => {
-    // TODO: extract style
     return (
         <Layout>
             <ConfigProvider locale={zhCN}>
                 <MenuSider menus={menus} />
                 <Layout>
                     <MenuHeader />
-                    <Scrollbars autoHide universal >
-                        <Layout id={"content-holder"} style={{ padding: '0 24px' }}>
-                            <Layout.Content style={{ marginTop: '20px' }}>
+                    <Scrollbars
+                        autoHide
+                        universal
+                        renderTrackHorizontal={ props =>
+                            <div className={["track-horizontal", style.horizontalScrollbar]} {...props} />
+                        }
+                        renderThumbHorizontal={ props =>
+                            <div className={["thumb-horizontal", style.horizontalScrollbar]} {...props} />
+                        }
+                    >
+                        <Layout id={"content-holder"} className={style.contentHolder}>
+                            <Layout.Content className={style.layoutContent}>
                                 {
                                     ribbon ?
                                         <Badge.Ribbon text={ribbon}><Card><ContentLoader>{ children }</ContentLoader></Card></Badge.Ribbon> :
@@ -26,7 +35,7 @@ const MenuLayout = ({ ribbon, children }) => {
                                 }
                             </Layout.Content>
                         </Layout>
-                        <Layout.Footer style={{ textAlign: 'center' }}>
+                        <Layout.Footer className={style.layoutFooter}>
                             2021 Created by <a href={"https://github.com/TangliziGit"}>Tanglizi</a>
                         </Layout.Footer>
                     </Scrollbars>

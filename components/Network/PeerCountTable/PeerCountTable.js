@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {InputNumber, Table} from 'antd';
 
 const PeerCountTable = ({ onChange, peerCounts }) => {
