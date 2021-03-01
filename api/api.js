@@ -21,11 +21,12 @@ axios.interceptors.response.use(
     }
 );
 
-export default function Api(path, options = {}) {
+export default function Api(method, path, options = {}) {
+    const url = path;
     let params = {};
     let data = {};
 
-    const call = () => axios.get(path, { params, data, ...options });
+    const call = () => axios({ method, url, params, data, ...options });
     const builder = Object.assign({ done: call }, {
         query: ps => {
             params = ps;
