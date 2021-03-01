@@ -16,6 +16,7 @@
     "date-fns": "^2.17.0",
     "gray-matter": "^4.0.2",
     "hover.css": "^2.3.2",
+    "moment": "^2.29.1",
     "next": "9.5.3",
     "next-compose-plugins": "^2.2.0",
     "nprogress": "^0.2.0",
