@@ -8,32 +8,17 @@ import {useRouter} from "next/router";
 import ModelPage from "../../components/ModelPage/ModelPage";
 import PeerCountTable from "../../components/Network/PeerCountTable/PeerCountTable";
 
-const stimulate = () => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const error = (new Date()) % 2 === 0;
+const interactWithMessage = (reqPromiseFn) => {
+    return async () => {
+        const key = moment().valueOf();
+        message.loading({content: 'loading', key});
 
-            if (error)
-                reject('the message for error from the backend');
-            else
-                resolve();
-        }, 2000);
-    });
-}
-
-// TODO: interact with network
-const submitNetwork = () => stimulate;
-const stopNetworkById = (id) => stimulate;
-const deleteNetworkById = (id) => stimulate;
-
-const interactWithMessage = async ({ key, loadingContent, successContent, errorContent, reqPromiseFn }) => {
-    message.loading({content: loadingContent, key});
-
-    try {
-        await reqPromiseFn();
-        message.success({content: successContent, key});
-    } catch (e) {
-        message.error({content: errorContent, key});
+        try {
+            await reqPromiseFn();
+            message.success({content: 'success', key});
+        } catch (e) {
+            message.error({content: `error: ${e}`, key});
+        }
     }
 }
 
@@ -78,29 +63,9 @@ const NetworkPage = () => {
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
-    const handleSubmit = () => interactWithMessage({
-        key: 'create a network',
-        loadingContent: 'Creating your network',
-        successContent: 'Network has been created',
-        errorContent: 'Error occurred when creating a network',
-        reqPromiseFn: submitNetwork(),
-    });
-
-    const handleStopNetwork = (id) => () => interactWithMessage({
-        key: `stop a network ${id}`,
-        loadingContent: 'Stopping your network',
-        successContent: 'Network has been stopped',
-        errorContent: 'Error occurred when stopping a network',
-        reqPromiseFn: stopNetworkById(id),
-    });
-
-    const handleDeleteNetwork = (id) => () => interactWithMessage({
-        key: `delete a network ${id}`,
-        loadingContent: 'Deleting your network',
-        successContent: 'Network has been deleted',
-        errorContent: 'Error occurred when deleting a network',
-        reqPromiseFn: deleteNetworkById(id),
-    });
+    const handleSubmit = interactWithMessage(() => api.createNetwork(network));
+    const handleStopNetwork = (id) => interactWithMessage(() => api.stopNetwork(id));
+    const handleDeleteNetwork = (id) => interactWithMessage(() => api.deleteNetwork(id));
 
     const columns = [
         {

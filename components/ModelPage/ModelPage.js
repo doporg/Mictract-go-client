@@ -47,19 +47,20 @@ const ModelPage = ({ columns, dataSourcePromiseFn, setSortedInfo, setFilteredInf
     return (
         <MenuLayout>
             <div className={globalStyle.contentMargin} >
-                <Button type="primary" onClick={() => setDrawerVisible(true)}>
-                    <PlusOutlined /> { drawerTitle }
-                </Button>
-
                 <Search
                     placeholder="按名查询"
                     onSearch={handleSearch}
                     onChange={e => searchInputChange$.next(e.target.value)}
-                    style={{
-                        maxWidth: '300px',
-                        float: 'right'
-                    }}
+                    style={{ maxWidth: '300px' }}
                 />
+
+                <Button
+                    type="primary"
+                    onClick={() => setDrawerVisible(true)}
+                    style={{ float: 'right' }}
+                >
+                    <PlusOutlined /> { drawerTitle }
+                </Button>
             </div>
 
             <ModelDrawer
