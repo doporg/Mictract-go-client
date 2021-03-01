@@ -7,8 +7,9 @@ const api = {
           .body({message})
           .done(),
 
+
   // networks
-  getNetworks: () =>
+  listNetworks: () =>
       Api('GET', `/api/network`).done(),
 
   createNetwork: (network) =>
@@ -21,6 +22,21 @@ const api = {
 
   stopNetwork: (id) =>
       Api('POST', `/api/network/${id}/stop`).done(),
+
+
+  // user
+  listUsers: () =>
+      Api('GET', `/api/user`).done(),
+
+  createUser: (user) =>
+      Api('POST', `/api/user`)
+          .body(user)
+          .done(),
+
+  deleteUser: (url) =>
+      Api('DELETE', `/api/user`)
+          .body(url)
+          .done(),
 }
 
 export default api;
