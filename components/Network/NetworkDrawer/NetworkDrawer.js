@@ -13,33 +13,29 @@ const NetworkDrawer = ({ onClose, visible, handleSubmit }) => {
     });
 
     const setNetworkByKey = (key) => {
-        return (value) => {
-            setNetwork((network) => ({ ...network, [key]: value }));
-        }
+        return value =>
+            setNetwork( network =>
+                R.mergeRight(network, { [key]: value })
+            );
     }
 
     const setOrgCount = (count) => {
-        const peerCounts = network.peerCounts;
-        if ( count < peerCounts.length ) {
-            setNetwork((network) => ({
-                ...network, peerCounts: R.take(count)(peerCounts)
-            }));
-        } else {
-            while (count > peerCounts.length)
-                peerCounts.push(2);
-            setNetwork((network) => ({
-                ...network, peerCounts
-            }))
-        }
+        const diff = count - network.peerCounts.length;
+        const compute = diff < 0 ?
+            R.take(count) :
+            R.concat(R.__, R.repeat(2)(diff));
+        const peerCounts = compute(network.peerCounts)
+
+        setNetwork( network =>
+            R.mergeRight(network, { peerCounts })
+        )
     }
 
     const setPeerCountsByKey = (key, value) => {
         setNetwork(network => {
-            // TODO: use ramda
-            // NOTE: diffing algo is based on the pointer address.
-            const peerCounts = [ ...network.peerCounts ];
-            peerCounts[key] = value;
-            return { ...network, peerCounts };
+            // NOTE: here use shallow copy because diffing algo is based on the pointer address.
+            network.peerCounts[key] = value;
+            return { ...network };
         })
     }
 
@@ -87,10 +83,10 @@ const NetworkDrawer = ({ onClose, visible, handleSubmit }) => {
                 <Form.Item label={'排序节点个数'}>
                     <Row gutter={16}>
                         <Col span={6}>
-                            <InputNumber min={1} max={20} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
+                            <InputNumber min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
                         </Col>
                         <Col span={18}>
-                            <Slider min={1} max={20} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
+                            <Slider min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
                         </Col>
                     </Row>
                 </Form.Item>
