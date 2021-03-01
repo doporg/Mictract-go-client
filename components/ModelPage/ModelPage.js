@@ -34,8 +34,8 @@ const ModelPage = ({ columns, dataSourcePromiseFn, setSortedInfo, setFilteredInf
     // TODO: handle error
     useEffect(() => {
         (async () => {
-            const { data: networks } = await dataSourcePromiseFn();
-            setDataSource(networks);
+            const { data } = await dataSourcePromiseFn();
+            setDataSource(data);
         })()
     }, []);
 
@@ -76,7 +76,7 @@ const ModelPage = ({ columns, dataSourcePromiseFn, setSortedInfo, setFilteredInf
                 className={globalStyle.contentMargin}
                 loading={tableLoading}
                 columns={columns}
-                dataSource={dataSource.filter(x => x.name.includes(searchName))}
+                dataSource={dataSource.filter(x => x.name.toLowerCase().includes(searchName.toLowerCase()))}
                 onChange={handleChange}
                 pagination={{
                     showSizeChanger: true,
