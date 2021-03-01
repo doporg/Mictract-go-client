@@ -1,15 +1,13 @@
-import {DeploymentUnitOutlined, CoffeeOutlined, HomeOutlined} from "@ant-design/icons";
+import {DeploymentUnitOutlined, HomeOutlined, UserOutlined} from "@ant-design/icons";
 
 const rawMenus = [
-    // TODO: icon
     { key: 'index', title: '首页', path: '/', icon: <HomeOutlined /> },
 
     { key: 'network', title: '网络管理', icon: <DeploymentUnitOutlined /> },
     { key: 'network-list', parentKey: "network", title: '网络列表', path: '/network' },
 
-    { key: 'demo', title: 'Demo', icon: <CoffeeOutlined /> },
-    { key: 'demo-demo', parentKey: 'demo', title: 'Demo', path: '/demo/demo' },
-    { key: 'demo-welcome', parentKey: 'demo', title: 'Welcome', path: '/demo/welcome' },
+    { key: 'user', title: '用户管理', icon: <UserOutlined /> },
+    { key: 'user-list', parentKey: "user", title: '用户列表', path: '/user' },
 ];
 
 const getMenusWithChildren = (rawMenus) => {
