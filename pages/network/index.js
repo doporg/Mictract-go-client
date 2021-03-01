@@ -5,8 +5,8 @@ import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import moment from 'moment';
 import * as R from 'ramda';
 import {useRouter} from "next/router";
-import ModelPage from "../../components/ModelPage/ModelPage";
-import PeerCountTable from "../../components/Network/PeerCountTable/PeerCountTable";
+import ModelPage from "components/ModelPage/ModelPage";
+import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
 
 const interactWithMessage = (reqPromiseFn) => {
     return async () => {
@@ -167,7 +167,7 @@ const NetworkPage = () => {
         <ModelPage
             drawerTitle={'新增网络'}
             columns={columns}
-            dataSourcePromiseFn={api.getNetworks}
+            dataSourcePromiseFn={api.listNetworks}
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
             handleSubmit={handleSubmit}
