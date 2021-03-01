@@ -1,85 +1,106 @@
-import MenuLayout from "components/MenuLayout/MenuLayout";
-import {Badge, Button, Input, message, Table, Tag} from "antd";
-import { useEffect, useState } from 'react';
+import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
+import { useState } from 'react';
 import api from 'api';
-import globalStyle from '../index.less';
-import {PlusOutlined} from "@ant-design/icons";
-import NetworkDrawer from "components/Network/NetworkDrawer/NetworkDrawer";
+import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import moment from 'moment';
 import * as R from 'ramda';
 import {useRouter} from "next/router";
-import {Subject} from "rxjs";
-import {debounceTime, throttleTime} from "rxjs/operators";
+import ModelPage from "../../components/ModelPage/ModelPage";
+import PeerCountTable from "../../components/Network/PeerCountTable/PeerCountTable";
 
-const { Search } = Input;
+const stimulate = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const error = (new Date()) % 2 === 0;
+
+            if (error)
+                reject('the message for error from the backend');
+            else
+                resolve();
+        }, 2000);
+    });
+}
+
+// TODO: interact with network
+const submitNetwork = () => stimulate;
+const stopNetworkById = (id) => stimulate;
+const deleteNetworkById = (id) => stimulate;
+
+const interactWithMessage = async ({ key, loadingContent, successContent, errorContent, reqPromiseFn }) => {
+    message.loading({content: loadingContent, key});
+
+    try {
+        await reqPromiseFn();
+        message.success({content: successContent, key});
+    } catch (e) {
+        message.error({content: errorContent, key});
+    }
+}
 
 const NetworkPage = () => {
+    // ========== add new network ==========
+    const [ network, setNetwork ] = useState({
+        consensus: 'solo',
+        tlsEnabled: true,
+        ordererCount: 1,
+        peerCounts: [ 2, 2 ],
+    });
+
+    const setNetworkByKey = (key) => {
+        return value =>
+            setNetwork( network =>
+                R.mergeRight(network, { [key]: value })
+            );
+    }
+
+    const setOrgCount = (count) => {
+        const diff = count - network.peerCounts.length;
+        const compute = diff < 0 ?
+            R.take(count) :
+            R.concat(R.__, R.repeat(2)(diff));
+        const peerCounts = compute(network.peerCounts)
+
+        setNetwork( network =>
+            R.mergeRight(network, { peerCounts })
+        )
+    }
+
+    const setPeerCountsByKey = (key, value) => {
+        setNetwork(network => {
+            // NOTE: here use shallow copy because diffing algo is based on the pointer address.
+            network.peerCounts[key] = value;
+            return { ...network };
+        })
+    }
+
+    // ========== presentation networks ==========
     const router = useRouter();
-    const [ tableLoading, setTableLoading ] = useState(false);
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ drawerVisible, setDrawerVisible ] = useState(false);
-    const [ searchName, setSearchName ] = useState('');
 
-    const handleSearch = (value) => {
-        setSearchName(value);
-        setTableLoading(false);
-    };
+    const handleSubmit = () => interactWithMessage({
+        key: 'create a network',
+        loadingContent: 'Creating your network',
+        successContent: 'Network has been created',
+        errorContent: 'Error occurred when creating a network',
+        reqPromiseFn: submitNetwork(),
+    });
 
-    const searchInputChange$ = new Subject();
-    searchInputChange$
-        .pipe(
-            throttleTime(1000),
-            debounceTime(100),
-        ).subscribe(handleSearch)
-    searchInputChange$
-        .subscribe(() => {
-            setTableLoading(true);
-        })
+    const handleStopNetwork = (id) => () => interactWithMessage({
+        key: `stop a network ${id}`,
+        loadingContent: 'Stopping your network',
+        successContent: 'Network has been stopped',
+        errorContent: 'Error occurred when stopping a network',
+        reqPromiseFn: stopNetworkById(id),
+    });
 
-    // TODO: handle error
-    useEffect(() => {
-        (async () => {
-            const { data: networks } = await api.getNetworks();
-            setDataSource(networks);
-        })()
-    }, []);
-
-    const stopNetworkById = (id) => {
-        return () => {
-            const key = `stop network ${id}`;
-            message.loading({ content: `stopping network`, key });
-            // TODO: stop network
-
-            setTimeout(() => {
-                const error = (new Date()) % 2 === 0;
-                if (error) {
-                    message.success({ content: "The network has been stopped", key });
-                } else {
-                    message.error({ content: "Error occurred when stopping network", key });
-                }
-            }, 2000);
-        }
-    }
-
-    const deleteNetworkById = (id) => {
-        return () => {
-            const key = `delete network ${id}`;
-            message.loading({ content: `deleting network`, key });
-            // TODO: delete network
-
-            setTimeout(() => {
-                const error = (new Date()) % 2 === 0;
-                if (error) {
-                    message.success({ content: "The network has been deleted", key });
-
-                } else {
-                    message.error({ content: "Error occurred when deleting network", key });
-                }
-            }, 2000);
-        }
-    }
+    const handleDeleteNetwork = (id) => () => interactWithMessage({
+        key: `delete a network ${id}`,
+        loadingContent: 'Deleting your network',
+        successContent: 'Network has been deleted',
+        errorContent: 'Error occurred when deleting a network',
+        reqPromiseFn: deleteNetworkById(id),
+    });
 
     const columns = [
         {
@@ -165,77 +186,78 @@ const NetworkPage = () => {
             dataIndex: 'actions',
             title: '操作',
             render: (_, { key }) => {
+                // TODO: link to `/monitor/[id]`
                 return (
-                    <>
+                    <Button.Group>
                         <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
-                        <Button onClick={stopNetworkById(key)}>停止</Button>
-                        <Button onClick={deleteNetworkById(key)}>删除</Button>
-                    </>
+                        <Button onClick={handleStopNetwork(key)}>停止</Button>
+                        <Button onClick={handleDeleteNetwork(key)}>删除</Button>
+                    </Button.Group>
                 );
             }
         }
     ];
 
-    const handleChange = (pagination, filters, sorter) => {
-        setFilteredInfo(filters);
-        setSortedInfo(sorter);
-    }
-
-
-    const handleSubmit = () => {
-        setDrawerVisible(false);
-        const key = 'create network';
-        message.loading({ content: "Creating new network", key });
-        // TODO: interactions
-
-        setTimeout(() => {
-            const error = (new Date()) % 2 === 0;
-            if (error) {
-                message.success({ content: "The network has been created", key });
-            } else {
-                message.error({ content: "Error occurred when creating network", key });
-            }
-        }, 2000);
-    }
-
     return (
-        <MenuLayout>
-            <div className={globalStyle.contentMargin} >
-                <Button type="primary" onClick={() => setDrawerVisible(true)}>
-                    <PlusOutlined /> 新增网络
-                </Button>
+        <ModelPage
+            drawerTitle={'新增网络'}
+            columns={columns}
+            dataSourcePromiseFn={api.getNetworks}
+            setSortedInfo={setSortedInfo}
+            setFilteredInfo={setFilteredInfo}
+            handleSubmit={handleSubmit}
+        >
+            <Form layout={'vertical'}>
+                <Row gutter={16}>
+                    <Col span={18}>
+                        <Form.Item label={'共识协议'} rules={{ require: true, message: '请选择共识协议' }}>
+                            <Select placeholder='请选择共识协议' onChange={setNetworkByKey('consensus')} value={network.consensus}>
+                                <Select.Option value="solo">solo</Select.Option>
+                                <Select.Option value="etcdraft">etcdRaft</Select.Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                        <Form.Item label={'开启TLS'} >
+                            <Switch
+                                defaultChecked
+                                checkedChildren={<CheckOutlined />}
+                                unCheckedChildren={<CloseOutlined />}
+                                onChange={setNetworkByKey('tlsEnabled')}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
 
-                <Search
-                    placeholder="按网络名查询"
-                    onSearch={handleSearch}
-                    onChange={e => searchInputChange$.next(e.target.value)}
-                    style={{
-                        maxWidth: '300px',
-                        float: 'right'
-                    }}
-                />
-            </div>
+            <Form layout={'vertical'}>
+                <Form.Item label={'排序节点个数'}>
+                    <Row gutter={16}>
+                        <Col span={6}>
+                            <InputNumber min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
+                        </Col>
+                        <Col span={18}>
+                            <Slider min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
+                        </Col>
+                    </Row>
+                </Form.Item>
 
-            <NetworkDrawer
-                onClose={() => setDrawerVisible(false)}
-                visible={drawerVisible}
-                handleSubmit={handleSubmit}
-            />
-
-            <Table
-                className={globalStyle.contentMargin}
-                loading={tableLoading}
-                columns={columns}
-                dataSource={dataSource.filter(x => x.name.includes(searchName))}
-                onChange={handleChange}
-                pagination={{
-                    showSizeChanger: true,
-                    showQuickJumper: true,
-                }}
-            />
-
-        </MenuLayout>
-    )
-}
+                <Form.Item label={'组织个数'}>
+                    <Row gutter={16}>
+                        <Col span={6}>
+                            <InputNumber min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
+                        </Col>
+                        <Col span={18}>
+                            <Slider min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
+                        </Col>
+                    </Row>
+                </Form.Item>
+                <Form.Item label={'节点个数'}>
+                    <PeerCountTable onChange={setPeerCountsByKey} peerCounts={network.peerCounts} />
+                </Form.Item>
+            </Form>
+        </ModelPage>
+    );
+};
 
 export default NetworkPage;

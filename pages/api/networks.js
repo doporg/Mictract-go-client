@@ -26,7 +26,7 @@ const dataSource = [
         orderers: [ 'orderer1.net1.com' ],
         organizations: [ 'org1.net1.com', 'org2.net1.com' ],
         createTime: '1318781876406',
-        status: 'running',
+        status: 'stopped',
     },
     {
         name: 'net1.com',
@@ -35,7 +35,7 @@ const dataSource = [
         orderers: [ 'orderer1.net1.com' ],
         organizations: [ 'org1.net1.com', 'org2.net1.com' ],
         createTime: '1318781876406',
-        status: 'running',
+        status: 'starting',
     },
     {
         name: 'net1.com',
@@ -44,7 +44,7 @@ const dataSource = [
         orderers: [ 'orderer1.net1.com' ],
         organizations: [ 'org1.net1.com', 'org2.net1.com' ],
         createTime: '1318781876406',
-        status: 'running',
+        status: 'error',
     },
     {
         name: 'net1.com',
