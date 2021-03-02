@@ -32,7 +32,7 @@ const ChannelPage = () => {
     useEffect(() => {
         (async () => {
             const { data: networks } = await api.listNetworks();
-            setNetworks(networks.map(n => n.name));
+            setNetworks(networks.map(R.prop('name')));
         })();
     }, []);
 
@@ -47,11 +47,11 @@ const ChannelPage = () => {
     const setChannelByKey = key => value =>
         setChannel( channel => R.mergeRight(channel, { [key]: value }));
 
-    const onNetworkChange = async value => {
-        setChannelByKey('network')(value);
+    const onNetworkChange = async network => {
+        setChannelByKey('network')(network);
 
         // TODO: handle error
-        const { data: peers } = await api.listPeersByNetwork(value)
+        const { data: peers } = await api.listPeersByNetwork({network})
         setPeersInNetwork(peers);
     };
 

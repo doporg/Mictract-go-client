@@ -38,6 +38,11 @@ const api = {
           .body(url)
           .done(),
 
+  listOrganizationsByNetwork: (network) =>
+      Api('GET', `/api/organization`)
+          .query(network)
+          .done(),
+
 
   // channel
   listChannel: () =>

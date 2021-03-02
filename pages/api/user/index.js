@@ -33,6 +33,7 @@ export default (req, res) => {
                 .json(dataSource);
             break;
         case 'POST':
+            // TODO: simulate
             console.log(req.body);
             if (error)
                 res.status(400).json({});
@@ -40,6 +41,7 @@ export default (req, res) => {
                 res.status(200).json({});
             break;
         case 'DELETE':
+            // TODO: simulate
             res.status(200).json({})
     }
 }

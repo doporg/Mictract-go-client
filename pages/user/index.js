@@ -1,6 +1,6 @@
 import moment from "moment";
 import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "../../api";
 import ModelPage from "../../components/ModelPage/ModelPage";
@@ -36,6 +36,23 @@ const UserPage = () => {
     };
 
     // ========== presentation networks ==========
+    const [ networks, setNetworks ] = useState([]);
+    useEffect(() => {
+        (async () => {
+            const { data: networks } = await api.listNetworks();
+            setNetworks( networks.map(R.prop('name')) )
+        })()
+    }, []);
+
+    const [ orgsInNetwork, setOrgsInNetwork ] = useState([]);
+    const onNetworkChange = async network => {
+        setUserByKey('network')(network);
+
+        // TODO: handle error
+        const { data: orgs } = await api.listOrganizationsByNetwork({network});
+        setOrgsInNetwork(orgs);
+    };
+
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
@@ -138,15 +155,23 @@ const UserPage = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>
-                            <Select placeholder='请选择所属网络' onChange={setUserByKey('network')} value={user.network}>
-                                <Select.Option value="TODO">TODO</Select.Option>
+                            <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={user.network}>
+                                {
+                                    networks
+                                        .map(net => <Select.Option value={net}>{net}</Select.Option>)
+                                }
                             </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label={'所属组织'} rules={{ require: true, message: '请填写所属组织' }}>
                             <Select placeholder='请选择所属组织' onChange={setUserByKey('organization')} value={user.organization}>
-                                <Select.Option value="TODO">TODO</Select.Option>
+                                {
+                                    orgsInNetwork
+                                        .map(name =>
+                                            <Select.Option value={name}>{name}</Select.Option>
+                                        )
+                                }
                             </Select>
                         </Form.Item>
                     </Col>
