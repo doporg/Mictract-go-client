@@ -1,3 +1,4 @@
+const randomStr = () => Math.random().toString().substr(2, 8);
 const dataSource = [
     {
         name: 'net1.com',
@@ -85,7 +86,7 @@ const dataSource = [
 ].map((net, idx) => ({
     ...net,
     key: idx,
-    name: `${net.name}-${Math.random().toString().substr(2, 8)}`
+    name: net.name.replace(/1/, randomStr()),
 }));
 
 export default (req, res) => {

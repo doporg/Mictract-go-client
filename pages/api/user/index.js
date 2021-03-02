@@ -38,6 +38,7 @@ export default (req, res) => {
                 res.status(400).json({});
             else
                 res.status(200).json({});
+            break;
         case 'DELETE':
             res.status(200).json({})
     }
