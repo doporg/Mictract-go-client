@@ -1,12 +1,9 @@
 import moment from "moment";
-import {Badge, Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
+import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
 import {useState} from "react";
 import * as R from "ramda";
-import {useRouter} from "next/router";
 import api from "../../api";
 import ModelPage from "../../components/ModelPage/ModelPage";
-import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
-import PeerCountTable from "../../components/Network/PeerCountTable/PeerCountTable";
 
 const interactWithMessage = (reqPromiseFn) => {
     return async () => {
