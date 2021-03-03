@@ -1,3 +1,5 @@
+import * as R from "ramda";
+
 const randomStr = () => Math.random().toString().substr(2, 8);
 const dataSource = [
     {
@@ -100,15 +102,33 @@ export default (req, res) => {
                 .json(dataSource);
             break;
         case 'POST':
-            // TODO: simulate
-            console.log(req.body);
+            const network = req.body;
+
+            console.log(network);
             if (error)
                 res.status(400).json({});
-            else
+            else {
+                network.key = dataSource.length;
+                network.name = `net${network.key}.com`;
+                network.orderers = R.range(1, network.orderers + 1)
+                    .map(x => `orderer${x}.${network.name}`);
+                network.organizations = R.range(1, network.peerCounts.length + 1)
+                    .map(x => `org${x}.${network.name}`);
+                network.createTime = '1318781876406';
+                network.status = 'running';
+
+                dataSource.push(network);
+                console.log(network);
+
                 res.status(200).json({});
+            }
             break;
         case 'DELETE':
-            // TODO: simulate
+            const name = req.body;
+
+            const index = dataSource.findIndex(R.propEq('name', name));
+            dataSource.splice(index, 1);
+
             res.status(200).json({});
     }
 }

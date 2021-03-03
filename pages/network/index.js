@@ -1,5 +1,5 @@
 import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import api from 'api';
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import moment from 'moment';
@@ -60,12 +60,29 @@ const NetworkPage = () => {
 
     // ========== presentation networks ==========
     const router = useRouter();
+    const [ dataSource, setDataSource ] = useState([]);
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
-    const handleSubmit = interactWithMessage(() => api.createNetwork(network));
-    const handleStopNetwork = (id) => interactWithMessage(() => api.stopNetwork(id));
-    const handleDeleteNetwork = (id) => interactWithMessage(() => api.deleteNetwork(id));
+    const refresh = async () => {
+        const { data: networks } = await api.listNetworks();
+        setDataSource(networks);
+    };
+
+    useEffect(() => {
+        refresh();
+    }, []);
+
+    const handleSubmit = async () => {
+        await interactWithMessage(() => api.createNetwork(network))();
+        await refresh();
+    };
+
+    const handleStopNetwork = id => interactWithMessage(() => api.stopNetwork(id));
+    const handleDeleteNetwork = name => async () => {
+        await interactWithMessage(() => api.deleteNetwork(name))();
+        await refresh();
+    }
 
     const columns = [
         {
@@ -150,13 +167,13 @@ const NetworkPage = () => {
             key: 'actions',
             dataIndex: 'actions',
             title: '操作',
-            render: (_, { key }) => {
+            render: (_, { key, name }) => {
                 // TODO: link to `/monitor/[id]`
                 return (
                     <Button.Group>
                         <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
-                        <Button onClick={handleStopNetwork(key)}>停止</Button>
-                        <Button onClick={handleDeleteNetwork(key)}>删除</Button>
+                        <Button onClick={handleStopNetwork(name)}>停止</Button>
+                        <Button onClick={handleDeleteNetwork(name)}>删除</Button>
                     </Button.Group>
                 );
             }
@@ -167,7 +184,7 @@ const NetworkPage = () => {
         <ModelPage
             drawerTitle={'新增网络'}
             columns={columns}
-            dataSourcePromiseFn={api.listNetworks}
+            dataSource={dataSource}
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
             handleSubmit={handleSubmit}
