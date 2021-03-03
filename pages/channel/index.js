@@ -92,7 +92,7 @@ const ChannelPage = () => {
             render: R.pipe(
                 R.map( name => <Tag key={name} color={'purple'}>{getShorterPeerName(name)}</Tag>),
                 R.splitEvery(5),
-                R.map(R.append(<br />)),
+                R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
                 R.flatten,
             ),
         },
@@ -116,7 +116,6 @@ const ChannelPage = () => {
         }
     ];
 
-    // TODO: unique key
     return (
         <ModelPage
             drawerTitle={'新增通道'}

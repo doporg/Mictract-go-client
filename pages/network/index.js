@@ -117,11 +117,11 @@ const NetworkPage = () => {
             key: 'orderers',
             dataIndex: 'orderers',
             title: '排序节点',
-            render: (value) => {
+            render: value => {
                 const compute = R.pipe(
-                    R.map((v, i) => <Tag color='cyan' key={i}> { v.split('.')[0] } </Tag>),
+                    R.map(v => <Tag color='cyan' key={v}> { v.split('.')[0] } </Tag>),
                     R.splitEvery(3),
-                    R.map(row => [ ...row, <br /> ]),
+                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
                     R.flatten()
                 );
                 return <div> { compute(value) } </div>;
@@ -131,11 +131,11 @@ const NetworkPage = () => {
             key: 'organizations',
             dataIndex: 'organizations',
             title: '组织',
-            render: (value) => {
+            render: value => {
                 const compute = R.pipe(
-                    R.map((v, i) => <Tag color='geekblue' key={i}> { v.split('.')[0] } </Tag>),
+                    R.map(v => <Tag color='geekblue' key={v}> { v.split('.')[0] } </Tag>),
                     R.splitEvery(5),
-                    R.map(row => [ ...row, <br /> ]),
+                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
                     R.flatten()
                 );
                 return <div> { compute(value) } </div>;
@@ -170,7 +170,7 @@ const NetworkPage = () => {
             render: (_, { key, name }) => {
                 // TODO: link to `/monitor/[id]`
                 return (
-                    <Button.Group>
+                    <Button.Group key={name}>
                         <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
                         <Button onClick={handleStopNetwork(name)}>停止</Button>
                         <Button onClick={handleDeleteNetwork(name)}>删除</Button>

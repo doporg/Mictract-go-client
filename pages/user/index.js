@@ -175,7 +175,7 @@ const UserPage = () => {
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={user.network}>
                                 {
                                     networks
-                                        .map(net => <Select.Option value={net}>{net}</Select.Option>)
+                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
                                 }
                             </Select>
                         </Form.Item>
