@@ -17,8 +17,10 @@ const api = {
           .body(network)
           .done(),
 
-  deleteNetwork: (id) =>
-      Api('DELETE', `/api/network/${id}`).done(),
+  deleteNetwork: (name) =>
+      Api('DELETE', `/api/network`)
+          .body(name)
+          .done(),
 
   stopNetwork: (id) =>
       Api('POST', `/api/network/${id}/stop`).done(),
@@ -53,9 +55,9 @@ const api = {
           .body(channel)
           .done(),
 
-  deleteChannel: (url) =>
+  deleteChannel: (name) =>
       Api('DELETE', `/api/channel`)
-          .body(url)
+          .body(name)
           .done(),
 
   listPeersByNetwork: (network) =>

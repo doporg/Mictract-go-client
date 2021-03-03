@@ -9,9 +9,8 @@ import ModelDrawer from "../ModelDrawer/ModelDrawer";
 
 const { Search } = Input;
 
-const ModelPage = ({ columns, dataSourcePromiseFn, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
+const ModelPage = ({ columns, dataSource, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
     const [ tableLoading, setTableLoading ] = useState(false);
-    const [ dataSource, setDataSource ] = useState([]);
     const [ drawerVisible, setDrawerVisible ] = useState(false);
     const [ searchName, setSearchName ] = useState('');
 
@@ -30,14 +29,6 @@ const ModelPage = ({ columns, dataSourcePromiseFn, setSortedInfo, setFilteredInf
         .subscribe(() => {
             setTableLoading(true);
         })
-
-    // TODO: handle error
-    useEffect(() => {
-        (async () => {
-            const { data } = await dataSourcePromiseFn();
-            setDataSource(data);
-        })()
-    }, []);
 
     const handleChange = (pagination, filters, sorter) => {
         setFilteredInfo(filters);

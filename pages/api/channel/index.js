@@ -1,3 +1,5 @@
+import * as R from 'ramda';
+
 const dataSource = [
     {
         name: 'myChannel',
@@ -46,15 +48,23 @@ export default (req, res) => {
                 .json(dataSource);
             break;
         case 'POST':
-            // TODO: simulate
-            console.log(req.body);
-            if (error)
+            const channel = req.body;
+
+            if (error) {
                 res.status(400).json({});
-            else
+            } else {
+                channel.key = dataSource.length;
+                dataSource.push(channel);
+
                 res.status(200).json({});
+            }
             break;
         case 'DELETE':
-            // TODO: simulate
+            const { name } = req.body;
+
+            const index = dataSource.findIndex(R.propEq('name', name));
+            dataSource.splice(index, 1);
+
             res.status(200).json({})
     }
 }

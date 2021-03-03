@@ -56,10 +56,26 @@ const ChannelPage = () => {
     };
 
     // ========== presentation channel ==========
+    const [ dataSource, setDataSource ] = useState([]);
     const [ sortedInfo, setSortedInfo ] = useState({});
+    const refresh = async () => {
+        const { data: channels } = await api.listChannel();
+        setDataSource(channels);
+    };
 
-    const handleSubmit = interactWithMessage(() => api.createChannel(channel));
-    const handleDeleteChannel = (url) => interactWithMessage(() => api.deleteChannel(url));
+    useEffect(() => {
+        refresh();
+    }, []);
+
+    const handleSubmit = async () => {
+        await interactWithMessage(() => api.createChannel(channel))();
+        await refresh();
+    };
+
+    const handleDeleteChannel = name => async () => {
+        await interactWithMessage(() => api.deleteChannel(name))();
+        await refresh();
+    }
 
     const columns = [
         {
@@ -74,7 +90,7 @@ const ChannelPage = () => {
             dataIndex: 'peers',
             title: '包含节点',
             render: R.pipe(
-                R.map( name => <Tag color={'purple'}>{getShorterPeerName(name)}</Tag>),
+                R.map( name => <Tag key={name} color={'purple'}>{getShorterPeerName(name)}</Tag>),
                 R.splitEvery(5),
                 R.map(R.append(<br />)),
                 R.flatten,
@@ -84,27 +100,28 @@ const ChannelPage = () => {
             key: 'network',
             dataIndex: 'network',
             title: '所属网络',
-            render: value => <Tag color={'green'}>{value.split('.')[0]}</Tag>
+            render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
         },
         {
             key: 'actions',
             dataIndex: 'actions',
             title: '操作',
-            render: (_, { key }) => {
+            render: (_, { name }) => {
                 return (
                     <Button.Group>
-                        <Button onClick={handleDeleteChannel(key)}>删除</Button>
+                        <Button onClick={handleDeleteChannel(name)}>删除</Button>
                     </Button.Group>
                 );
             }
         }
     ];
 
+    // TODO: unique key
     return (
         <ModelPage
             drawerTitle={'新增通道'}
             columns={columns}
-            dataSourcePromiseFn={api.listChannel}
+            dataSource={dataSource}
             setSortedInfo={setSortedInfo}
             handleSubmit={handleSubmit}
         >
@@ -120,7 +137,7 @@ const ChannelPage = () => {
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={channel.network}>
                                 {
                                     networks
-                                        .map(net => <Select.Option value={net}>{net}</Select.Option>)
+                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
                                 }
                             </Select>
                         </Form.Item>
@@ -131,7 +148,7 @@ const ChannelPage = () => {
                                 {
                                     peersInNetwork
                                         .map(name =>
-                                            <Select.Option value={name}>{getShorterPeerName(name)}</Select.Option>
+                                            <Select.Option key={name} value={name}>{getShorterPeerName(name)}</Select.Option>
                                         )
                                 }
                             </Select>
