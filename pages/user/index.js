@@ -53,11 +53,28 @@ const UserPage = () => {
         setOrgsInNetwork(orgs);
     };
 
+    const [ dataSource, setDataSource ] = useState([]);
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
-    const handleSubmit = interactWithMessage(() => api.createUser(user));
-    const handleDeleteUser = (url) => interactWithMessage(() => api.deleteUser(url));
+    const refresh = async () => {
+        const { data: users } = await api.listUsers();
+        setDataSource(users);
+    };
+
+    useEffect(() => {
+        refresh();
+    }, []);
+
+    const handleSubmit = async () => {
+        await interactWithMessage(() => api.createUser(user))();
+        await refresh();
+    };
+
+    const handleDeleteUser = url => async () => {
+        await interactWithMessage(() => api.deleteUser(url))();
+        await refresh();
+    }
 
     const columns = [
         {
@@ -127,7 +144,7 @@ const UserPage = () => {
         <ModelPage
             drawerTitle={'新增用户'}
             columns={columns}
-            dataSourcePromiseFn={api.listUsers}
+            dataSource={dataSource}
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
             handleSubmit={handleSubmit}

@@ -1,3 +1,5 @@
+import * as R from "ramda";
+
 const dataSource = [
     {
         name: 'Admin1@net1.com',
@@ -22,6 +24,27 @@ const dataSource = [
     },
 ].map((net, idx) => ({ ...net, key: idx }));
 
+const computeUsername = ({ role, organization: org }) => {
+    const count = R.pipe(
+        R.filter(
+            R.allPass([
+                R.propEq('role', role),
+                R.propEq('organization', org),
+            ])
+        ),
+        R.length()
+    )(dataSource);
+
+    console.log('count', count);
+
+    switch (role) {
+        case 'user':
+            return `User${count}@${org}`;
+        case 'admin':
+            return `Admin${count}@${org}`;
+    }
+};
+
 export default (req, res) => {
     const { method } = req;
 
@@ -33,15 +56,26 @@ export default (req, res) => {
                 .json(dataSource);
             break;
         case 'POST':
-            // TODO: simulate
-            console.log(req.body);
-            if (error)
+            const user = req.body;
+            console.log(user);
+
+            if (error) {
                 res.status(400).json({});
-            else
+            } else {
+                user.key = dataSource.length;
+                user.name = computeUsername(user);
+                console.log(user);
+                dataSource.push(user);
+
                 res.status(200).json({});
+            }
             break;
         case 'DELETE':
-            // TODO: simulate
+            const { url: name } = req.body;
+
+            const index = dataSource.findIndex(R.propEq('name', name));
+            dataSource.splice(index, 1);
+
             res.status(200).json({})
     }
 }
