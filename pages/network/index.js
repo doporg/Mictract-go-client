@@ -1,4 +1,4 @@
-import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
+import {Badge, Button, Col, Form, InputNumber, Row, Select, Slider, Switch, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
@@ -7,20 +7,7 @@ import * as R from 'ramda';
 import {useRouter} from "next/router";
 import ModelPage from "components/ModelPage/ModelPage";
 import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
-
-const interactWithMessage = (reqPromiseFn) => {
-    return async () => {
-        const key = moment().valueOf();
-        message.loading({content: 'loading', key});
-
-        try {
-            await reqPromiseFn();
-            message.success({content: 'success', key});
-        } catch (e) {
-            message.error({content: `error: ${e}`, key});
-        }
-    }
-}
+import {interactWithMessage} from "util";
 
 const NetworkPage = () => {
     // ========== add new network ==========

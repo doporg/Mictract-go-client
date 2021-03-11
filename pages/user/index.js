@@ -1,23 +1,9 @@
-import moment from "moment";
-import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
+import {Button, Col, Form, Input, Row, Select, Tag} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
-import api from "../../api";
-import ModelPage from "../../components/ModelPage/ModelPage";
-
-const interactWithMessage = (reqPromiseFn) => {
-    return async () => {
-        const key = moment().valueOf();
-        message.loading({content: 'loading', key});
-
-        try {
-            await reqPromiseFn();
-            message.success({content: 'success', key});
-        } catch (e) {
-            message.error({content: `error: ${e}`, key});
-        }
-    }
-}
+import api from "api";
+import ModelPage from "components/ModelPage/ModelPage";
+import {interactWithMessage} from "util";
 
 const UserPage = () => {
     // ========== add new user ==========
