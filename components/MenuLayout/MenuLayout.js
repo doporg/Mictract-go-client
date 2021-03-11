@@ -10,6 +10,12 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import style from './MenuLayout.less';
 
 const MenuLayout = ({ ribbon, children }) => {
+    const content = (
+        <Card className={style.layoutCard}>
+            <ContentLoader>{ children }</ContentLoader>
+        </Card>
+    );
+
     return (
         <Layout>
             <ConfigProvider locale={zhCN}>
@@ -30,8 +36,8 @@ const MenuLayout = ({ ribbon, children }) => {
                             <Layout.Content className={style.layoutContent}>
                                 {
                                     ribbon ?
-                                        <Badge.Ribbon text={ribbon}><Card><ContentLoader>{ children }</ContentLoader></Card></Badge.Ribbon> :
-                                        <Card><ContentLoader>{ children }</ContentLoader></Card>
+                                        <Badge.Ribbon text={ribbon}> {content} </Badge.Ribbon> :
+                                        content
                                 }
                             </Layout.Content>
                         </Layout>
