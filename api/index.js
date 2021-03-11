@@ -47,7 +47,7 @@ const api = {
 
 
   // channel
-  listChannel: () =>
+  listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
   createChannel: (channel) =>
@@ -60,9 +60,27 @@ const api = {
           .body(name)
           .done(),
 
-  listPeersByNetwork: (network) =>
+  listPeersByNetwork: (networkUrl) =>
       Api('GET', `/api/peer`)
-          .query({ network })
+          .query({ network: networkUrl })
+          .done(),
+
+  // organization
+  listOrganizations: () =>
+      Api('GET', `/api/organization`).done(),
+
+  createOrganization: (organization) =>
+      Api('POST', `/api/organization`)
+          .body(organization)
+          .done(),
+
+  deleteOrganization: (name) =>
+      Api('DELETE', `/api/organization`)
+          .body(name),
+
+  listPeersByOrganization: (organizationUrl) =>
+      Api('GET', `/api/peer`)
+          .query({ organization: organizationUrl })
           .done(),
 }
 
