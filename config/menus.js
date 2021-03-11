@@ -11,6 +11,9 @@ const rawMenus = [
 
     { key: 'channel', title: '通道管理', icon: <ApartmentOutlined /> },
     { key: 'channel-list', parentKey: "channel", title: '通道列表', path: '/channel' },
+
+    { key: 'organization', title: '组织管理', icon: <ApartmentOutlined /> },
+    { key: 'organization-list', parentKey: "organization", title: '组织列表', path: '/organization' },
 ];
 
 const getMenusWithChildren = (rawMenus) => {
