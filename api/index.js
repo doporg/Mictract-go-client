@@ -17,15 +17,13 @@ const api = {
           .body(network)
           .done(),
 
+  // TODO: correct arg name
   // Example:
-  // { name: 'net1' }
-  deleteNetwork: (name) =>
+  // { url: 'net1.com' }
+  deleteNetwork: (url) =>
       Api('DELETE', `/api/network`)
-          .body(name)
+          .body({url})
           .done(),
-
-  stopNetwork: (id) =>
-      Api('POST', `/api/network/${id}/stop`).done(),
 
 
   // ==================== user ====================
@@ -44,19 +42,20 @@ const api = {
           .body(user)
           .done(),
 
+  // TODO: correct arg name
   // Example:
   // { url: 'User1@org1.net1.com' }
   deleteUser: (url) =>
       Api('DELETE', `/api/user`)
-          .body(url)
+          .body({url})
           .done(),
 
-  // TODO: change `network` into `networkUrl`
+  // TODO: correct arg name
   // Example:
-  // { network: 'net1.com' }
+  // { networkUrl: 'net1.com' }
   listOrganizationsByNetwork: (network) =>
       Api('GET', `/api/organization`)
-          .query(network)
+          .query({networkUrl: network})
           .done(),
 
 
@@ -64,13 +63,13 @@ const api = {
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
+  // TODO: correct args
   // Example:
   // {
-  //     name: 'myChannel',
   //     network: 'net1.com',
-  //     peers: [
-  //         'peer1.org1.net1.com',
-  //         'peer2.org1.net1.com',
+  //     orgs: [
+  //         'org1.net1.com',
+  //         'org2.net1.com',
   //     ]
   // },
   createChannel: (channel) =>
@@ -78,19 +77,12 @@ const api = {
           .body(channel)
           .done(),
 
-  // Example:
-  // { name: 'myChannel' }
-  deleteChannel: (name) =>
-      Api('DELETE', `/api/channel`)
-          .body(name)
-          .done(),
-
   // TODO: change `network` into `networkUrl`
   // Example:
   // { networkUrl: 'net1.com' }
   listPeersByNetwork: (networkUrl) =>
       Api('GET', `/api/peer`)
-          .query({ network: networkUrl })
+          .query({ networkUrl })
           .done(),
 
 
@@ -107,17 +99,17 @@ const api = {
 
   // TODO: change `name` into `url`
   // Example:
-  // { name: 'org1.net1.com' }
-  deleteOrganization: (name) =>
+  // { url: 'org1.net1.com' }
+  deleteOrganization: (url) =>
       Api('DELETE', `/api/organization`)
-          .body(name),
+          .body({url}),
 
   // TODO: change `organization` into `organizationUrl`
   // Example:
-  // { organization: 'org1.net1.com' }
+  // { organizationUrl: 'org1.net1.com' }
   listPeersByOrganization: (organizationUrl) =>
       Api('GET', `/api/peer`)
-          .query({ organization: organizationUrl })
+          .query({ organizationUrl })
           .done(),
 }
 
