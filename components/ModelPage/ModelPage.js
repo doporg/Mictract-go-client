@@ -9,7 +9,7 @@ import ModelDrawer from "../ModelDrawer/ModelDrawer";
 
 const { Search } = Input;
 
-const ModelPage = ({ columns, dataSource, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
+const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
     const [ tableLoading, setTableLoading ] = useState(false);
     const [ drawerVisible, setDrawerVisible ] = useState(false);
     const [ searchName, setSearchName ] = useState('');
@@ -31,8 +31,10 @@ const ModelPage = ({ columns, dataSource, setSortedInfo, setFilteredInfo, drawer
         })
 
     const handleChange = (pagination, filters, sorter) => {
-        setFilteredInfo(filters);
-        setSortedInfo(sorter);
+        if (setFilteredInfo)
+            setFilteredInfo(filters);
+        if (setSortedInfo)
+            setSortedInfo(sorter);
     }
 
     return (
@@ -66,6 +68,7 @@ const ModelPage = ({ columns, dataSource, setSortedInfo, setFilteredInfo, drawer
             <Table
                 className={globalStyle.contentMargin}
                 loading={tableLoading}
+                rowKey={rowKey}
                 columns={columns}
                 dataSource={dataSource.filter(x => x.name.toLowerCase().includes(searchName.toLowerCase()))}
                 onChange={handleChange}

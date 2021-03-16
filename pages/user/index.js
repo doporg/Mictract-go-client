@@ -131,6 +131,7 @@ const UserPage = () => {
             drawerTitle={'新增用户'}
             columns={columns}
             dataSource={dataSource}
+            rowKey={ R.prop('name') }
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
             handleSubmit={handleSubmit}

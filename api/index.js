@@ -63,7 +63,7 @@ const api = {
   // Example:
   // {
   //     network: 'net1.com',
-  //     orgs: [
+  //     organizations: [
   //         'org1.net1.com',
   //         'org2.net1.com',
   //     ]
@@ -79,7 +79,10 @@ const api = {
       Api('GET', `/api/organization`).done(),
 
   // Example:
-  // { peerCount: 2 }
+  // {
+  //    networkUrl: 'net1.com',
+  //    peerCount: 2,
+  // }
   createOrganization: (organization) =>
       Api('POST', `/api/organization`)
           .body(organization)

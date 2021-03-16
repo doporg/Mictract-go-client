@@ -81,6 +81,7 @@ const ChannelPage = () => {
             drawerTitle={'新增通道'}
             columns={columns}
             dataSource={dataSource}
+            rowKey={ record => `${record.name}-${record.network}` }
             setSortedInfo={setSortedInfo}
             handleSubmit={handleSubmit}
         >

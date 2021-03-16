@@ -119,7 +119,7 @@ const NetworkPage = () => {
             title: '组织',
             render: value => {
                 const compute = R.pipe(
-                    R.map(v => <Tag color='geekblue' key={v}> { v.split('.')[0] } </Tag>),
+                    R.map(({name: v}) => <Tag color='geekblue' key={v}> { v.split('.')[0] } </Tag>),
                     R.splitEvery(5),
                     R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
                     R.flatten()
@@ -170,6 +170,7 @@ const NetworkPage = () => {
             drawerTitle={'新增网络'}
             columns={columns}
             dataSource={dataSource}
+            rowKey={ R.prop('name') }
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
             handleSubmit={handleSubmit}
