@@ -1,95 +1,5 @@
 import * as R from "ramda";
-
-const randomStr = () => Math.random().toString().substr(2, 8);
-const dataSource = [
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [
-            'orderer1.net1.com', 'orderer2.net1.com', 'orderer3.net1.com',
-            'orderer4.net1.com', 'orderer5.net1.com', 'orderer6.net1.com',
-            'orderer7.net1.com', 'orderer8.net1.com', 'orderer9.net1.com',
-            'orderer10.net1.com',
-        ],
-        organizations: [
-            'org1.net1.com', 'org2.net1.com', "org3.net1.com", "org4.net1.com",
-            'org5.net1.com', 'org6.net1.com', "org7.net1.com", "org8.net1.com",
-            'org9.net1.com', 'org10.net1.com', "org11.net1.com", "org12.net1.com",
-            'org13.net1.com', 'org14.net1.com', "org15.net1.com", "org16.net1.com",
-            'org17.net1.com', 'org18.net1.com', "org19.net1.com", "org20.net1.com",
-        ],
-        createTime: '1318781876406',
-        status: 'running',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'stopped',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'starting',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'error',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'running',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'running',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'running',
-    },
-    {
-        name: 'net1.com',
-        consensus: 'etcdRaft',
-        tlsEnabled: 'true',
-        orderers: [ 'orderer1.net1.com' ],
-        organizations: [ 'org1.net1.com', 'org2.net1.com' ],
-        createTime: '1318781876406',
-        status: 'running',
-    },
-].map((net, idx) => ({
-    ...net,
-    key: idx,
-    name: net.name.replace(/1/, randomStr()),
-}));
+import networkSource, {createChannels, createOrderers, createOrganizations} from "../index";
 
 export default (req, res) => {
     const { method } = req;
@@ -99,35 +9,39 @@ export default (req, res) => {
     switch (method) {
         case 'GET':
             res.status(200)
-                .json(dataSource);
+                .json(networkSource);
             break;
+
         case 'POST':
             const network = req.body;
 
             console.log(network);
-            if (error)
+            if (error) {
                 res.status(400).json({});
-            else {
-                network.key = dataSource.length;
-                network.name = `net${network.key}.com`;
-                network.orderers = R.range(1, network.orderers + 1)
-                    .map(x => `orderer${x}.${network.name}`);
-                network.organizations = R.range(1, network.peerCounts.length + 1)
-                    .map(x => `org${x}.${network.name}`);
-                network.createTime = '1318781876406';
+            } else {
+                network.name = `net${networkSource.length+1}.com`;
                 network.status = 'running';
+                network.createTime = '1318781876406';
+                network.orderers = createOrderers(network.ordererCount, network.name);
+                // ignore peer count for each organization
+                network.organizations = createOrganizations(network.peerCounts.length, network.name);
+                network.users = [];
+                network.channels = createChannels(1, network.organizations.length, network.name);
+                delete network.ordererCount;
+                delete network.peerCounts;
 
-                dataSource.push(network);
+                networkSource.push(network);
                 console.log(network);
 
                 res.status(200).json({});
             }
             break;
-        case 'DELETE':
-            const name = req.body;
 
-            const index = dataSource.findIndex(R.propEq('name', name));
-            dataSource.splice(index, 1);
+        case 'DELETE':
+            const { url } = req.body;
+
+            const index = networkSource.findIndex(R.propEq('name', url));
+            networkSource.splice(index, 1);
 
             res.status(200).json({});
     }

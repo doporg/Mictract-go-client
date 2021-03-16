@@ -1,7 +1,5 @@
 import * as R from "ramda";
-
-const orgs = (networkUrl) => R.range(1, 6)
-    .map( orgId => ({ name: `org${orgId}.${networkUrl}` }));
+import networkSource, {createPeers} from "../index";
 
 export default (req, res) => {
     const { method } = req;
@@ -14,32 +12,41 @@ export default (req, res) => {
                 case req.query.networkUrl !== undefined:
                     // net1.com
                     const { networkUrl } = req.query;
+                    const network = networkSource
+                        .find(R.propEq('name', networkUrl));
 
                     res.status(200)
-                        .json(orgs(networkUrl));
+                        .json(network.organizations);
                     break;
 
                 default:
                     // list all orgs
-                    const result = R.range(1, 6)
-                        .map(id => `net${id}.com`)
-                        .flatMap(orgs)
-                        .map(({name: orgUrl}) => ({
-                            name: orgUrl,
-                            peers: R.range(1, 3).map(id => `peer${id}.${orgUrl}`),
-                            network: orgUrl.split('.').slice(1).join('.')
-                        }))
-                        .map((org, key) => ({ ...org, key }));
+                    let orgs = [];
+                    for (const net of networkSource) {
+                        const netOrgs = [ ...net.organizations ];
+                        netOrgs.forEach(o => o.network = net.name);
+                        orgs = [ ...orgs, ...netOrgs];
+                    }
 
                     res.status(200)
-                        .json(result);
+                        .json(orgs);
             }
             break;
 
         case 'POST':
-            const { organization } = req.query;
+            const organization = req.body;
+            const network = networkSource.find(
+                R.propEq('name', organization.networkUrl)
+            );
+
+            organization.name = `org1.${organization.networkUrl}`
+            organization.peers = createPeers(organization.peerCount, organization.name);
+            organization.users = [];
+            delete organization.networkUrl;
+            delete organization.peerCount;
 
             console.log(organization);
+            network.organizations.push(organization);
             res.status(200).json({});
 
             break;
@@ -47,8 +54,14 @@ export default (req, res) => {
         case 'DELETE':
             // org1.net1.com
             const { url } = req.query;
+            const netUrl = url.split('.').slice(1).join('.');
+            const net = networkSource.find(
+                R.propEq('name', netUrl)
+            );
+
+            const index = net.organizations.findIndex(R.propEq('name', url))
+            net.organizations.splice(index, 1);
 
             res.status(200).json({});
-
     }
 }

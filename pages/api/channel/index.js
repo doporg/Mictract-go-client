@@ -1,33 +1,5 @@
 import * as R from 'ramda';
-
-const dataSource = [
-    {
-        name: 'channel1',
-        network: 'net1.com',
-        organizations: [
-            'org1.net1.com',
-            'org2.net1.com',
-            'org3.net1.com',
-            'org4.net1.com',
-        ]
-    },
-    {
-        name: 'channel2',
-        network: 'net1.com',
-        organizations: [
-            'org2.net1.com',
-            'org3.net1.com',
-        ]
-    },
-    {
-        name: 'channel1',
-        network: 'net2.com',
-        organizations: [
-            'org1.net2.com',
-            'org2.net2.com',
-        ]
-    },
-].map((net, idx) => ({ ...net, key: idx }));
+import networkSource from "../index";
 
 export default (req, res) => {
     const { method } = req;
@@ -36,27 +8,32 @@ export default (req, res) => {
 
     switch (method) {
         case 'GET':
+            let channels = [];
+            for (const net of networkSource) {
+                const netChannel = [ ...net.channels ];
+                netChannel.forEach(c => c.network = net.name);
+                channels = [ ...channels, ...netChannel];
+            }
+
             res.status(200)
-                .json(dataSource);
+                .json(channels);
             break;
+
         case 'POST':
             const channel = req.body;
 
             if (error) {
                 res.status(400).json({});
             } else {
-                channel.key = dataSource.length;
-                dataSource.push(channel);
+                const network = networkSource
+                    .find(R.propEq('name', channel.network));
+
+                delete channel['network'];
+                channel.name = `channel${network.channels.length+1}`;
+                network.channels.push(channel);
 
                 res.status(200).json({});
             }
             break;
-        case 'DELETE':
-            const { name } = req.body;
-
-            const index = dataSource.findIndex(R.propEq('name', name));
-            dataSource.splice(index, 1);
-
-            res.status(200).json({})
     }
 }
