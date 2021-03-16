@@ -1,7 +1,7 @@
 import * as R from "ramda";
 
 const orgs = (networkUrl) => R.range(1, 6)
-    .map( orgId => `org${orgId}.${networkUrl}` );
+    .map( orgId => ({ name: `org${orgId}.${networkUrl}` }));
 
 export default (req, res) => {
     const { method } = req;
@@ -11,12 +11,12 @@ export default (req, res) => {
     switch (method) {
         case 'GET':
             switch (true) {
-                case req.query.network:
+                case req.query.networkUrl !== undefined:
                     // net1.com
-                    const { network } = req.query;
+                    const { networkUrl } = req.query;
 
                     res.status(200)
-                        .json(orgs(network));
+                        .json(orgs(networkUrl));
                     break;
 
                 default:
@@ -24,7 +24,7 @@ export default (req, res) => {
                     const result = R.range(1, 6)
                         .map(id => `net${id}.com`)
                         .flatMap(orgs)
-                        .map(orgUrl => ({
+                        .map(({name: orgUrl}) => ({
                             name: orgUrl,
                             peers: R.range(1, 3).map(id => `peer${id}.${orgUrl}`),
                             network: orgUrl.split('.').slice(1).join('.')
@@ -46,7 +46,7 @@ export default (req, res) => {
 
         case 'DELETE':
             // org1.net1.com
-            const { name } = req.query;
+            const { url } = req.query;
 
             res.status(200).json({});
 

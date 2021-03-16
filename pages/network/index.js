@@ -7,7 +7,7 @@ import * as R from 'ramda';
 import {useRouter} from "next/router";
 import ModelPage from "components/ModelPage/ModelPage";
 import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
-import {interactWithMessage} from "util";
+import {interactWithMessage} from "pages/index";
 
 const NetworkPage = () => {
     // ========== add new network ==========
@@ -65,9 +65,8 @@ const NetworkPage = () => {
         await refresh();
     };
 
-    const handleStopNetwork = id => interactWithMessage(() => api.stopNetwork(id));
-    const handleDeleteNetwork = name => async () => {
-        await interactWithMessage(() => api.deleteNetwork(name))();
+    const handleDeleteNetwork = networkUrl => async () => {
+        await interactWithMessage(() => api.deleteNetwork(networkUrl))();
         await refresh();
     }
 
@@ -159,7 +158,6 @@ const NetworkPage = () => {
                 return (
                     <Button.Group key={name}>
                         <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
-                        <Button onClick={handleStopNetwork(name)}>停止</Button>
                         <Button onClick={handleDeleteNetwork(name)}>删除</Button>
                     </Button.Group>
                 );

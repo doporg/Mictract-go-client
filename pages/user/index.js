@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "util";
+import {interactWithMessage} from "pages/index";
 
 const UserPage = () => {
     // ========== add new user ==========
@@ -31,11 +31,11 @@ const UserPage = () => {
     }, []);
 
     const [ orgsInNetwork, setOrgsInNetwork ] = useState([]);
-    const onNetworkChange = async network => {
-        setUserByKey('network')(network);
+    const onNetworkChange = async networkUrl => {
+        setUserByKey('network')(networkUrl);
 
         // TODO: handle error
-        const { data: orgs } = await api.listOrganizationsByNetwork({network});
+        const { data: orgs } = await api.listOrganizationsByNetwork(networkUrl);
         setOrgsInNetwork(orgs);
     };
 
@@ -57,8 +57,8 @@ const UserPage = () => {
         await refresh();
     };
 
-    const handleDeleteUser = url => async () => {
-        await interactWithMessage(() => api.deleteUser(url))();
+    const handleDeleteUser = userUrl => async () => {
+        await interactWithMessage(() => api.deleteUser(userUrl))();
         await refresh();
     }
 
@@ -171,8 +171,8 @@ const UserPage = () => {
                             <Select placeholder='请选择所属组织' onChange={setUserByKey('organization')} value={user.organization}>
                                 {
                                     orgsInNetwork
-                                        .map(name =>
-                                            <Select.Option value={name}>{name}</Select.Option>
+                                        .map(({ name }) =>
+                                            <Select.Option key={name} value={name}>{name}</Select.Option>
                                         )
                                 }
                             </Select>

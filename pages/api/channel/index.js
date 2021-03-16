@@ -2,37 +2,29 @@ import * as R from 'ramda';
 
 const dataSource = [
     {
-        name: 'myChannel',
+        name: 'channel1',
         network: 'net1.com',
-        peers: [
-            'peer1.org1.net1.com',
-            'peer2.org1.net1.com',
-            'peer1.org2.net1.com',
-            'peer2.org2.net1.com',
-            'peer1.org3.net1.com',
-            'peer2.org3.net1.com',
-            'peer1.org4.net1.com',
-            'peer2.org4.net1.com',
+        organizations: [
+            'org1.net1.com',
+            'org2.net1.com',
+            'org3.net1.com',
+            'org4.net1.com',
         ]
     },
     {
-        name: 'anotherChannel',
+        name: 'channel2',
         network: 'net1.com',
-        peers: [
-            'peer1.org2.net1.com',
-            'peer2.org2.net1.com',
-            'peer1.org3.net1.com',
-            'peer2.org3.net1.com',
+        organizations: [
+            'org2.net1.com',
+            'org3.net1.com',
         ]
     },
     {
-        name: 'againAnotherChannel',
+        name: 'channel1',
         network: 'net2.com',
-        peers: [
-            'peer1.org1.net2.com',
-            'peer2.org1.net2.com',
-            'peer1.org2.net2.com',
-            'peer2.org2.net2.com',
+        organizations: [
+            'org1.net2.com',
+            'org2.net2.com',
         ]
     },
 ].map((net, idx) => ({ ...net, key: idx }));

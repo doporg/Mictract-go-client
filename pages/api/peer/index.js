@@ -14,21 +14,19 @@ const peersByOrganization = (organizationUrl) =>
 export default (req, res) => {
     const { method } = req;
 
-    const error = (new Date()) % 2 === 0;
-
     switch (method) {
         case 'GET':
 
             switch (true) {
-                case req.query.network:
+                case req.query.networkUrl !== undefined:
                     // net1.com
-                    const { network } = req.query;
+                    const { networkUrl } = req.query;
 
                     res.status(200)
-                        .json(peersByNetwork(network));
+                        .json(peersByNetwork(networkUrl));
                     break;
 
-                case req.query.organization:
+                case req.query.organization !== undefined:
                     // org1.net1.com
                     const { organization } = req.query;
 

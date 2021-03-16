@@ -1,5 +1,6 @@
 import MenuLayout from "components/MenuLayout/MenuLayout";
-import { Typography } from 'antd';
+import {message, Typography} from 'antd';
+import moment from "moment";
 
 const { Title } = Typography;
 
@@ -11,4 +12,18 @@ export default function Index() {
             </div>
         </MenuLayout>
     );
+}
+
+export const interactWithMessage = (reqPromiseFn) => {
+    return async () => {
+        const key = moment().valueOf();
+        message.loading({content: 'loading', key});
+
+        try {
+            await reqPromiseFn();
+            message.success({content: 'success', key});
+        } catch (e) {
+            message.error({content: `error: ${e}`, key});
+        }
+    }
 }

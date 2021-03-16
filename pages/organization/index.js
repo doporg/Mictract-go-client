@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import api from 'api';
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "util";
+import {interactWithMessage} from "pages/index";
 
 const OrganizationPage = () => {
     // ========== add new organization ==========
@@ -33,13 +33,12 @@ const OrganizationPage = () => {
     }, []);
 
     const handleSubmit = async () => {
-        console.log(organization);
         await interactWithMessage(() => api.createOrganization({organization}))();
         await refresh();
     };
 
-    const handleDeleteOrganization = name => async () => {
-        await interactWithMessage(() => api.deleteOrganization(name))();
+    const handleDeleteOrganization = organizationUrl => async () => {
+        await interactWithMessage(() => api.deleteOrganization(organizationUrl))();
         await refresh();
     }
 

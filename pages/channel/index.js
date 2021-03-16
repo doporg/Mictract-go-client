@@ -1,19 +1,18 @@
-import {Button, Col, Form, Input, Row, Select, Tag} from "antd";
+import {Col, Form, Row, Select, Tag} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "util";
+import {interactWithMessage} from "pages/index";
 
 const ChannelPage = () => {
     // ========== add new channel ==========
     const [ channel, setChannel ] = useState({
-        name: '',
         network: '',
-        peers: [],
+        organizations: [],
     });
     const [ networks, setNetworks ] = useState([]);
-    const [ peersInNetwork, setPeersInNetwork ] = useState([]);
+    const [ organizationsInNetwork, setOrganizationsInNetwork ] = useState([]);
 
     useEffect(() => {
         (async () => {
@@ -22,23 +21,15 @@ const ChannelPage = () => {
         })();
     }, []);
 
-    // `getShorterPeerName` here just includes peer number and organization number.
-    // Example: peer1.org1.net1.com --> peer1-org1
-    const getShorterPeerName = R.pipe(
-        R.split('.'),
-        R.take(2),
-        R.join('-'),
-    );
-
     const setChannelByKey = key => value =>
         setChannel( channel => R.mergeRight(channel, { [key]: value }));
 
-    const onNetworkChange = async network => {
-        setChannelByKey('network')(network);
+    const onNetworkChange = async networkUrl => {
+        setChannelByKey('network')(networkUrl);
 
         // TODO: handle error
-        const { data: peers } = await api.listPeersByNetwork({network})
-        setPeersInNetwork(peers);
+        const { data: orgs } = await api.listOrganizationsByNetwork(networkUrl)
+        setOrganizationsInNetwork(orgs);
     };
 
     // ========== presentation channel ==========
@@ -58,11 +49,6 @@ const ChannelPage = () => {
         await refresh();
     };
 
-    const handleDeleteChannel = name => async () => {
-        await interactWithMessage(() => api.deleteChannel(name))();
-        await refresh();
-    }
-
     const columns = [
         {
             key: 'name',
@@ -72,11 +58,11 @@ const ChannelPage = () => {
             sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
         },
         {
-            key: 'peers',
-            dataIndex: 'peers',
-            title: '包含节点',
+            key: 'organizations',
+            dataIndex: 'organizations',
+            title: '包含组织',
             render: R.pipe(
-                R.map( name => <Tag key={name} color={'purple'}>{getShorterPeerName(name)}</Tag>),
+                R.map( name => <Tag key={name} color={'purple'}>{name.split('.')[0]}</Tag>),
                 R.splitEvery(5),
                 R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
                 R.flatten,
@@ -88,18 +74,6 @@ const ChannelPage = () => {
             title: '所属网络',
             render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
         },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { name }) => {
-                return (
-                    <Button.Group>
-                        <Button onClick={handleDeleteChannel(name)}>删除</Button>
-                    </Button.Group>
-                );
-            }
-        }
     ];
 
     return (
@@ -113,11 +87,6 @@ const ChannelPage = () => {
             <Form layout={'vertical'}>
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Form.Item label={'通道名'} rules={{ require: true, message: '请填写通道名' }}>
-                            <Input placeholder='请填写通道名' onChange={e => setChannelByKey('name')(e.target.value)} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
                         <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={channel.network}>
                                 {
@@ -128,12 +97,12 @@ const ChannelPage = () => {
                         </Form.Item>
                     </Col>
                     <Col span={24}>
-                        <Form.Item label={'包含节点'} rules={{ require: true, message: '请填写包含节点' }}>
-                            <Select placeholder='请填写包含节点' mode="tags" onChange={setChannelByKey('peers')}>
+                        <Form.Item label={'包含组织'} rules={{ require: true, message: '请填写包含节点' }}>
+                            <Select placeholder='请填写包含组织' mode="tags" onChange={setChannelByKey('organizations')}>
                                 {
-                                    peersInNetwork
-                                        .map(name =>
-                                            <Select.Option key={name} value={name}>{getShorterPeerName(name)}</Select.Option>
+                                    organizationsInNetwork
+                                        .map(({name}) =>
+                                            <Select.Option key={name} value={name}>{name.split('.')[0]}</Select.Option>
                                         )
                                 }
                             </Select>
