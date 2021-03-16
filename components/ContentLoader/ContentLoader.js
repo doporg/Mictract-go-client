@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import {Router} from "next/router";
 import {Spin} from "antd";
 import style from './ContentLoader.less';
@@ -23,12 +23,19 @@ const renderFailed = () => {
 }
 
 const ContentLoader = ({ children }) => {
+    let active = true;
     const [ loading, setLoading ] = useState(false);
     const [ failed, setFailed ] = useState(false);
 
+    useEffect(() => {
+        return () => active = false;
+    });
+
     Router.events.on('routeChangeStart', () => {
         NProgress.start();
-        setLoading(true);
+        if (active) {
+            setLoading(true);
+        }
     })
     Router.events.on('routeChangeError', () => {
         NProgress.done();
@@ -36,8 +43,10 @@ const ContentLoader = ({ children }) => {
     })
     Router.events.on('routeChangeComplete', () => {
         NProgress.done();
-        setLoading(false);
-        setFailed(false);
+        if (active) {
+            setLoading(false);
+            setFailed(false);
+        }
     })
 
     return (
