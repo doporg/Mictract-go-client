@@ -23,6 +23,7 @@ const MenuLayout = ({ ribbon, children }) => {
                 <Layout>
                     <MenuHeader />
                     <Scrollbars
+                        id={'content-holder'}
                         autoHide
                         universal
                         renderTrackHorizontal={ props =>
@@ -32,7 +33,7 @@ const MenuLayout = ({ ribbon, children }) => {
                             <div className={["thumb-horizontal", style.horizontalScrollbar]} {...props} />
                         }
                     >
-                        <Layout id={"content-holder"} className={style.contentHolder}>
+                        <Layout className={style.contentHolder}>
                             <Layout.Content className={style.layoutContent}>
                                 {
                                     ribbon ?
