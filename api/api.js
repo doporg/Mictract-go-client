@@ -16,7 +16,7 @@ axios.interceptors.response.use(
                 break;
 
             default:
-                console.log("Unkown error occurred.");
+                console.log("Unknown error occurred.");
                 break;
         }
     }
