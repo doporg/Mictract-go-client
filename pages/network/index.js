@@ -1,4 +1,4 @@
-import {Badge, Button, Col, Form, InputNumber, Row, Select, Slider, Switch, Tag} from "antd";
+import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
@@ -52,8 +52,13 @@ const NetworkPage = () => {
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
     const refresh = async () => {
-        const { data: networks } = await api.listNetworks();
-        setDataSource(networks);
+        try {
+            // const { data: networks } = await api.listNetworks();
+            // setDataSource(networks);
+            await api.listNetworks();
+        } catch (e) {
+            console.log(e.message);
+        }
     };
 
     useEffect(() => {
