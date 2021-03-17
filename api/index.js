@@ -3,7 +3,7 @@ import Api from "./api";
 const api = {
   // ==================== network ====================
   listNetworks: () =>
-      Api('GET', `/api/network/`).done(),
+      Api('GET', `/api/network`).done(),
 
   // Example:
   // {
@@ -13,7 +13,7 @@ const api = {
   //     peerCounts: [ 2, 2 ],
   // }
   createNetwork: (network) =>
-      Api('POST', `/api/network/`)
+      Api('POST', `/api/network`)
           .body(network)
           .done(),
 

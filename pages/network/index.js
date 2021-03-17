@@ -53,11 +53,10 @@ const NetworkPage = () => {
 
     const refresh = async () => {
         try {
-            // const { data: networks } = await api.listNetworks();
-            // setDataSource(networks);
-            await api.listNetworks();
+            const { data: {payload: networks} } = await api.listNetworks();
+            setDataSource(networks);
         } catch (e) {
-            console.log(e.message);
+            message.error(e.message);
         }
     };
 
