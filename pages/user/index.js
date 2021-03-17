@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, Row, Select, Tag} from "antd";
+import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
@@ -25,8 +25,12 @@ const UserPage = () => {
     const [ networks, setNetworks ] = useState([]);
     useEffect(() => {
         (async () => {
-            const { data: networks } = await api.listNetworks();
-            setNetworks( networks.map(R.prop('name')) )
+            try {
+                const { data: { payload: networks } } = await api.listNetworks();
+                setNetworks( networks.map(R.prop('name')) )
+            } catch (e) {
+                message.error(e);
+            }
         })()
     }, []);
 
@@ -34,9 +38,12 @@ const UserPage = () => {
     const onNetworkChange = async networkUrl => {
         setUserByKey('network')(networkUrl);
 
-        // TODO: handle error
-        const { data: orgs } = await api.listOrganizationsByNetwork(networkUrl);
-        setOrgsInNetwork(orgs);
+        try {
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl);
+            setOrgsInNetwork(orgs);
+        } catch (e) {
+            message.error(e);
+        }
     };
 
     const [ dataSource, setDataSource ] = useState([]);
@@ -44,8 +51,12 @@ const UserPage = () => {
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
     const refresh = async () => {
-        const { data: users } = await api.listUsers();
-        setDataSource(users);
+        try {
+            const { data: { payload: users } } = await api.listUsers();
+            setDataSource(users);
+        } catch (e) {
+            message.error(e);
+        }
     };
 
     useEffect(() => {

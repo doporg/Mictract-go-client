@@ -16,8 +16,12 @@ const ChannelPage = () => {
 
     useEffect(() => {
         (async () => {
-            const { data: networks } = await api.listNetworks();
-            setNetworks(networks.map(R.prop('name')));
+            try {
+                const { data: { payload: networks } } = await api.listNetworks();
+                setNetworks(networks.map(R.prop('name')));
+            } catch (e) {
+                message.error(e);
+            }
         })();
     }, []);
 
@@ -27,17 +31,24 @@ const ChannelPage = () => {
     const onNetworkChange = async networkUrl => {
         setChannelByKey('network')(networkUrl);
 
-        // TODO: handle error
-        const { data: orgs } = await api.listOrganizationsByNetwork(networkUrl)
-        setOrganizationsInNetwork(orgs);
+        try {
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl)
+            setOrganizationsInNetwork(orgs);
+        } catch (e) {
+            message.error(e);
+        }
     };
 
     // ========== presentation channel ==========
     const [ dataSource, setDataSource ] = useState([]);
     const [ sortedInfo, setSortedInfo ] = useState({});
     const refresh = async () => {
-        const { data: channels } = await api.listChannels();
-        setDataSource(channels);
+        try {
+            const { data: { payload: channels } } = await api.listChannels();
+            setDataSource(channels);
+        } catch (e) {
+            message.error(e);
+        }
     };
 
     useEffect(() => {

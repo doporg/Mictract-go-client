@@ -16,8 +16,12 @@ const OrganizationPage = () => {
 
     useEffect(() => {
         (async () => {
-            const { data: networks } = await api.listNetworks();
-            setNetworks(networks.map(R.prop('name')));
+            try {
+                const { data: { payload: networks } } = await api.listNetworks();
+                setNetworks(networks.map(R.prop('name')));
+            } catch (e) {
+                message.error(e);
+            }
         })();
     }, []);
 
@@ -35,8 +39,12 @@ const OrganizationPage = () => {
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
     const refresh = async () => {
-        const { data: orgs } = await api.listOrganizations();
-        setDataSource(orgs);
+        try {
+            const { data: { payload: orgs } } = await api.listOrganizations();
+            setDataSource(orgs);
+        } catch (e) {
+            message.error(e);
+        }
     };
 
     useEffect(() => {
