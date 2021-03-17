@@ -1,14 +1,29 @@
-import {Button, Typography} from 'antd';
+import MenuLayout from "components/MenuLayout/MenuLayout";
+import {message, Typography} from 'antd';
+import moment from "moment";
 
 const { Title } = Typography;
 
-const TestAntd = () => {
+export default function Index() {
     return (
-        <>
-            <Button> Test </Button>
-            <Title>It is just a test for antd less files.</Title>
-        </>
-    )
-};
+        <MenuLayout ribbon={"WIP"}>
+            <div style={{textAlign: 'center'}}>
+                <Title>Index Page</Title>
+            </div>
+        </MenuLayout>
+    );
+}
 
-export default TestAntd;
+export const interactWithMessage = (reqPromiseFn) => {
+    return async () => {
+        const key = moment().valueOf();
+        message.loading({content: 'loading', key});
+
+        try {
+            await reqPromiseFn();
+            message.success({content: 'success', key});
+        } catch (e) {
+            message.error({content: `error: ${e}`, key});
+        }
+    }
+}
