@@ -135,7 +135,7 @@ const NetworkPage = () => {
             key: 'createTime',
             dataIndex: 'createTime',
             title: '创建时间',
-            render: value => moment(parseInt(value)).format('YYYY-MM-DD'),
+            render: value => moment.unix(value).format('YYYY-MM-DD'),
         },
         {
             key: 'status',
@@ -147,6 +147,7 @@ const NetworkPage = () => {
                     [ R.equals('starting'), v => [ v, 'processing' ] ],
                     [ R.equals('stopped'),  v => [ v, 'warning' ] ],
                     [ R.equals('error'),    v => [ v, 'error' ] ],
+                    [ R.T,                     v => [ 'unknown', 'error' ] ],
                 ]),
                 ([ v, status ]) => {
                     return <Tag color={status}><Badge status={status} text={v}/></Tag>;
@@ -192,6 +193,7 @@ const NetworkPage = () => {
                     <Col span={6}>
                         <Form.Item label={'开启TLS'} >
                             <Switch
+                                disabled
                                 defaultChecked
                                 checkedChildren={<CheckOutlined />}
                                 unCheckedChildren={<CloseOutlined />}
