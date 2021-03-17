@@ -13,7 +13,7 @@ const createNetwork = (idFrom, idEnd) => {
                 consensus: consensus[id % 2],
                 tlsEnabled: true,
                 status: status[id % 4],
-                createTime: '1318781876406',
+                createTime: '1615958332',
                 orderers: createOrderers(5, url),
                 organizations: createOrganizations(5, url),
                 users: [
@@ -140,7 +140,7 @@ const networkSource = [
         consensus: 'etcdRaft',
         tlsEnabled: 'true',
         status: 'running',
-        createTime: '1318781876406',
+        createTime: '1615958332',
         orderers: [
             'orderer1.net1.com', 'orderer2.net1.com', 'orderer3.net1.com',
         ],
