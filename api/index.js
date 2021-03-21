@@ -29,9 +29,6 @@ const api = {
   listUsers: () =>
       Api('GET', `/api/user`).done(),
 
-  // TODO: integrate
-  // 1. organization should be full url
-  // 2. network should exists
   // Example:
   // {
   //     nickname: '',
@@ -60,14 +57,9 @@ const api = {
 
 
   // ==================== channel ====================
-  // TODO: integrate
-  // 1. network should exists
-  // 2. status should be 4 of [ running, starting, error, stopped ]
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
-  // TODO: integrate
-  // 1. `orgs` -> `organizations`
   // Example:
   // {
   //     network: 'net1.com',
@@ -84,8 +76,7 @@ const api = {
 
   // ==================== organization ====================
   // TODO: integrate
-  // can not find this api
-  // 看看是不是跟 listOrgsByNetwork 重复了
+  // network should exists
   listOrganizations: () =>
       Api('GET', `/api/organization`).done(),
 
@@ -99,13 +90,12 @@ const api = {
           .body(organization)
           .done(),
 
-  // TODO: integrate
-  // can not find this api
-  // Example:
-  // { url: 'org1.net1.com' }
-  deleteOrganization: (url) =>
-      Api('DELETE', `/api/organization`)
-          .body({url}),
+  // this feature is dead
+  // // Example:
+  // // { url: 'org1.net1.com' }
+  // deleteOrganization: (url) =>
+  //     Api('DELETE', `/api/organization`)
+  //         .body({url}),
 }
 
 export default api;
