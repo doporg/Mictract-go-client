@@ -142,8 +142,8 @@ const NetworkPage = () => {
                     [ R.equals('running'),  () => [ '运行中', 'success' ] ],
                     [ R.equals('starting'), () => [ '创建中', 'processing' ] ],
                     [ R.equals('stopped'),  () => [ '已停止', 'warning' ] ],
-                    [ R.equals('error'),    () => [ '出错了', 'error' ] ],
-                    [ R.T,                  () => [ 'unknown', 'error' ] ],
+                    [ R.equals('error'),    () => [ '已出错', 'error' ] ],
+                    [ R.T,                    () => [ '未知错', 'error' ] ],
                 ]),
                 ([ v, status ]) => {
                     return <Tag color={status}><Badge status={status} text={v}/></Tag>;
