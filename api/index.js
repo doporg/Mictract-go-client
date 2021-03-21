@@ -75,8 +75,6 @@ const api = {
 
 
   // ==================== organization ====================
-  // TODO: integrate
-  // network should exists
   listOrganizations: () =>
       Api('GET', `/api/organization`).done(),
 
