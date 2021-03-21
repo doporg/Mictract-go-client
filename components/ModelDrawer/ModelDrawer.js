@@ -18,8 +18,8 @@ const ModelDrawer = ({ title, onClose, visible, handleSubmit, children }) => {
             style={{ position: 'absolute' }}
             footer={
                 <div style={{textAlign: 'right'}}>
-                    <Button onClick={onClose} style={{ marginRight: 8 }}>Cancel</Button>
-                    <Button onClick={submit} type="primary">Submit</Button>
+                    <Button onClick={onClose} style={{ marginRight: 8 }}>取消</Button>
+                    <Button onClick={submit} type="primary">提交</Button>
                 </div>
             }
         >
