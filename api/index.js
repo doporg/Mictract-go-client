@@ -62,7 +62,7 @@ const api = {
   // ==================== channel ====================
   // TODO: integrate
   // 1. network should exists
-  // 2. status should be 4 of them
+  // 2. status should be 4 of [ running, starting, error, stopped ]
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
