@@ -29,12 +29,15 @@ const api = {
   listUsers: () =>
       Api('GET', `/api/user`).done(),
 
+  // TODO: integrate
+  // 1. organization should be full url
+  // 2. network should exists
   // Example:
   // {
   //     nickname: '',
   //     role: 'user',
-  //     organization: undefined,
-  //     network: undefined,
+  //     organization: 'org1.net1.com',
+  //     network: 'net1.com',
   // }
   createUser: (user) =>
       Api('POST', `/api/user`)
@@ -57,9 +60,14 @@ const api = {
 
 
   // ==================== channel ====================
+  // TODO: integrate
+  // 1. network should exists
+  // 2. status should be 4 of them
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
+  // TODO: integrate
+  // 1. `orgs` -> `organizations`
   // Example:
   // {
   //     network: 'net1.com',
@@ -75,6 +83,9 @@ const api = {
 
 
   // ==================== organization ====================
+  // TODO: integrate
+  // can not find this api
+  // 看看是不是跟 listOrgsByNetwork 重复了
   listOrganizations: () =>
       Api('GET', `/api/organization`).done(),
 
@@ -88,7 +99,8 @@ const api = {
           .body(organization)
           .done(),
 
-  // TODO: change `name` into `url`
+  // TODO: integrate
+  // can not find this api
   // Example:
   // { url: 'org1.net1.com' }
   deleteOrganization: (url) =>
