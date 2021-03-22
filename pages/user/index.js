@@ -12,6 +12,7 @@ const UserPage = () => {
         role: 'user',
         organization: undefined,
         network: undefined,
+        password: '',
     });
 
     const setUserByKey = (key) => {
@@ -188,6 +189,18 @@ const UserPage = () => {
                                         )
                                 }
                             </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
+
+                <Row gutter={16}>
+                    <Col>
+                        <Form.Item label={'密码'} rules={{ require: true, message: '请填写密码' }}>
+                            <Input
+                                type={'password'}
+                                placeholder={'请填写密码'}
+                                onChange={(e) => setUserByKey('password')(e.target.value)}
+                            />
                         </Form.Item>
                     </Col>
                 </Row>

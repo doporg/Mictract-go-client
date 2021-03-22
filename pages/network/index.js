@@ -97,11 +97,7 @@ const NetworkPage = () => {
             key: 'tlsEnabled',
             dataIndex: 'tlsEnabled',
             title: '开启TLS',
-            render: value => {
-                if (value === 'true')
-                    return '是';
-                return '否';
-            }
+            render: value => value ? '是' : '否',
         },
         {
             key: 'orderers',
@@ -143,11 +139,11 @@ const NetworkPage = () => {
             title: '状态',
             render: R.pipe(
                 R.cond([
-                    [ R.equals('running'),  v => [ v, 'success' ] ],
-                    [ R.equals('starting'), v => [ v, 'processing' ] ],
-                    [ R.equals('stopped'),  v => [ v, 'warning' ] ],
-                    [ R.equals('error'),    v => [ v, 'error' ] ],
-                    [ R.T,                     v => [ 'unknown', 'error' ] ],
+                    [ R.equals('running'),  () => [ '运行中', 'success' ] ],
+                    [ R.equals('starting'), () => [ '创建中', 'processing' ] ],
+                    [ R.equals('stopped'),  () => [ '已停止', 'warning' ] ],
+                    [ R.equals('error'),    () => [ '已出错', 'error' ] ],
+                    [ R.T,                    () => [ '未知错', 'error' ] ],
                 ]),
                 ([ v, status ]) => {
                     return <Tag color={status}><Badge status={status} text={v}/></Tag>;

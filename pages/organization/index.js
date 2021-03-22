@@ -1,4 +1,4 @@
-import {Button, Col, Form, InputNumber, Row, Select, Slider, Tag} from "antd";
+import {Button, Col, Form, InputNumber, message, Row, Select, Slider, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
 import * as R from 'ramda';
@@ -56,10 +56,12 @@ const OrganizationPage = () => {
         await refresh();
     };
 
-    const handleDeleteOrganization = organizationUrl => async () => {
-        await interactWithMessage(() => api.deleteOrganization(organizationUrl))();
-        await refresh();
-    }
+    // this feature has been removed
+    //
+    // const handleDeleteOrganization = organizationUrl => async () => {
+    //     await interactWithMessage(() => api.deleteOrganization(organizationUrl))();
+    //     await refresh();
+    // }
 
     const columns = [
         {
@@ -86,18 +88,20 @@ const OrganizationPage = () => {
             title: '所属网络',
             render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
         },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { name }) => {
-                return (
-                    <Button.Group>
-                        <Button onClick={handleDeleteOrganization(name)}>删除</Button>
-                    </Button.Group>
-                );
-            }
-        }
+        // this feature has been removed
+        //
+        // {
+        //     key: 'actions',
+        //     dataIndex: 'actions',
+        //     title: '操作',
+        //     render: (_, { name }) => {
+        //         return (
+        //             <Button.Group>
+        //                 <Button onClick={handleDeleteOrganization(name)}>删除</Button>
+        //             </Button.Group>
+        //         );
+        //     }
+        // }
     ];
 
     return (

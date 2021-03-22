@@ -33,8 +33,8 @@ const api = {
   // {
   //     nickname: '',
   //     role: 'user',
-  //     organization: undefined,
-  //     network: undefined,
+  //     organization: 'org1.net1.com',
+  //     network: 'net1.com',
   // }
   createUser: (user) =>
       Api('POST', `/api/user`)
@@ -88,12 +88,12 @@ const api = {
           .body(organization)
           .done(),
 
-  // TODO: change `name` into `url`
-  // Example:
-  // { url: 'org1.net1.com' }
-  deleteOrganization: (url) =>
-      Api('DELETE', `/api/organization`)
-          .body({url}),
+  // this feature is dead
+  // // Example:
+  // // { url: 'org1.net1.com' }
+  // deleteOrganization: (url) =>
+  //     Api('DELETE', `/api/organization`)
+  //         .body({url}),
 }
 
 export default api;
