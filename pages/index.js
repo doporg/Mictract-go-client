@@ -23,7 +23,7 @@ export const interactWithMessage = (reqPromiseFn) => {
             await reqPromiseFn();
             message.success({content: 'success', key});
         } catch (e) {
-            message.error({content: `error: ${e}`, key});
+            message.error({content: `error: ${e.response.data.message}`, key});
         }
     }
 }
