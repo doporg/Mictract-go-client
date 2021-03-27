@@ -201,27 +201,19 @@ const NetworkPage = () => {
             </Form>
 
             <Form layout={'vertical'}>
-                <Form.Item label={'排序节点个数'}>
-                    <Row gutter={16}>
-                        <Col span={6}>
+                <Row gutter={18}>
+                    <Col span={12}>
+                        <Form.Item label={'排序节点个数'}>
                             <InputNumber min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
-                        </Col>
-                        <Col span={18}>
-                            <Slider min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
-                        </Col>
-                    </Row>
-                </Form.Item>
-
-                <Form.Item label={'组织个数'}>
-                    <Row gutter={16}>
-                        <Col span={6}>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={'组织个数'}>
                             <InputNumber min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
-                        </Col>
-                        <Col span={18}>
-                            <Slider min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
-                        </Col>
-                    </Row>
-                </Form.Item>
+                        </Form.Item>
+                    </Col>
+                </Row>
+
                 <Form.Item label={'节点个数'}>
                     <PeerCountTable onChange={setPeerCountsByKey} peerCounts={network.peerCounts} />
                 </Form.Item>
