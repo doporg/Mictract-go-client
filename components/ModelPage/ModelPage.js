@@ -1,5 +1,5 @@
 import MenuLayout from "components/MenuLayout/MenuLayout";
-import {Button, Input, message, Table} from "antd";
+import {Button, Input, message, Table, Tooltip} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
 import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
@@ -57,7 +57,11 @@ const ModelPage = ({
     };
 
     const refresher = (
-        <div onClick={refresh} style={{ marginRight: '10px', cursor: 'pointer' }}>
+        <Tooltip
+            title={`每${REFRESH_INTERVAL / 1000}秒自动刷新列表`}
+            onClick={refresh}
+            style={{ marginRight: '10px', cursor: 'pointer' }}
+        >
             {
                 refreshing ?
                     <>
@@ -69,7 +73,7 @@ const ModelPage = ({
                         <p style={{ display: 'inline', color: 'gray' }}> 距上次自动更新 { refreshSecond } 秒 </p>
                     </>
             }
-        </div>
+        </Tooltip>
     );
 
     if (enableRefresh) {
