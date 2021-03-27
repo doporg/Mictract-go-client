@@ -57,23 +57,21 @@ const ModelPage = ({
     };
 
     const refresher = (
-        <Tooltip
-            title={`每${REFRESH_INTERVAL / 1000}秒自动刷新列表`}
-            onClick={refresh}
-            style={{ marginRight: '10px', cursor: 'pointer' }}
-        >
-            {
-                refreshing ?
-                    <>
-                        <SyncOutlined spin />
-                        <p style={{ display: 'inline', color: 'gray' }}> 自动刷新中 </p>
-                    </> :
-                    <>
-                        <SyncOutlined/>
-                        <p style={{ display: 'inline', color: 'gray' }}> 距上次自动更新 { refreshSecond } 秒 </p>
-                    </>
-            }
-        </Tooltip>
+        <div onClick={refresh} style={{ marginRight: '10px', cursor: 'pointer' }}>
+            <Tooltip title={`每${REFRESH_INTERVAL / 1000}秒自动刷新列表`}>
+                {
+                    refreshing ?
+                        <>
+                            <SyncOutlined spin />
+                            <p style={{ display: 'inline', color: 'gray' }}> 自动刷新中 </p>
+                        </> :
+                        <>
+                            <SyncOutlined/>
+                            <p style={{ display: 'inline', color: 'gray' }}> 距上次自动更新 { refreshSecond } 秒 </p>
+                        </>
+                }
+            </Tooltip>
+        </div>
     );
 
     if (enableRefresh) {
