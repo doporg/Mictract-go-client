@@ -51,7 +51,7 @@ const NetworkPage = () => {
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
-    const refresh = async () => {
+    const refreshAsync = async () => {
         try {
             const { data: {payload: networks} } = await api.listNetworks();
             setDataSource(networks);
@@ -61,17 +61,17 @@ const NetworkPage = () => {
     };
 
     useEffect(() => {
-        refresh();
+        refreshAsync();
     }, []);
 
     const handleSubmit = async () => {
         await interactWithMessage(() => api.createNetwork(network))();
-        await refresh();
+        await refreshAsync();
     };
 
     const handleDeleteNetwork = networkUrl => async () => {
         await interactWithMessage(() => api.deleteNetwork(networkUrl))();
-        await refresh();
+        await refreshAsync();
     }
 
     const columns = [
@@ -174,6 +174,10 @@ const NetworkPage = () => {
             rowKey={ R.prop('name') }
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
+
+            enableRefresh
+            onRefreshAsync={refreshAsync}
+
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>

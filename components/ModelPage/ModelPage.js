@@ -2,14 +2,22 @@ import MenuLayout from "components/MenuLayout/MenuLayout";
 import {Button, Input, message, Table} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
-import {PlusOutlined} from "@ant-design/icons";
-import {Subject} from "rxjs";
+import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
+import {interval, Observable, Subject} from "rxjs";
 import {debounceTime, throttleTime} from "rxjs/operators";
 import ModelDrawer from "../ModelDrawer/ModelDrawer";
 
 const { Search } = Input;
 
-const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
+const
+    THROTTLE_TIME = 1000,
+    DEBOUNCE_TIME = 100,
+    REFRESH_INTERVAL = 30 * 1000;
+
+const ModelPage = ({
+                       columns, dataSource, rowKey, setSortedInfo, setFilteredInfo,
+                       enableRefresh, onRefreshAsync,
+                       drawerTitle, handleSubmit, children }) => {
     const [ tableLoading, setTableLoading ] = useState(false);
     const [ drawerVisible, setDrawerVisible ] = useState(false);
     const [ searchName, setSearchName ] = useState('');
@@ -22,8 +30,8 @@ const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo
     const searchInputChange$ = new Subject();
     searchInputChange$
         .pipe(
-            throttleTime(1000),
-            debounceTime(100),
+            throttleTime(THROTTLE_TIME),
+            debounceTime(DEBOUNCE_TIME),
         ).subscribe(handleSearch)
     searchInputChange$
         .subscribe(() => {
@@ -37,6 +45,46 @@ const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo
             setSortedInfo(sorter);
     }
 
+    const [ refreshing, setRefreshing ] = useState(false);
+    const [ refreshSecond, setRefreshSecond ] = useState(0);
+
+    const refresh = async () => {
+        console.log('time to refresh');
+        setRefreshing(true);
+        await onRefreshAsync();
+        setRefreshing(false);
+        setRefreshSecond(0);
+    };
+
+    const refresher = (
+        <div onClick={refresh} style={{ marginRight: '10px', cursor: 'pointer' }}>
+            {
+                refreshing ?
+                    <>
+                        <SyncOutlined spin />
+                        <p style={{ display: 'inline', color: 'gray' }}> 自动刷新中 </p>
+                    </> :
+                    <>
+                        <SyncOutlined/>
+                        <p style={{ display: 'inline', color: 'gray' }}> 距上次自动更新 { refreshSecond } 秒 </p>
+                    </>
+            }
+        </div>
+    );
+
+    if (enableRefresh) {
+        useEffect(() => {
+            const secondTimer = setInterval(() => setRefreshSecond(timer => timer + 1), 1000);
+            const timer = setInterval(refresh, REFRESH_INTERVAL);
+
+            // clear timers when this component unmount.
+            return () => {
+                clearInterval(secondTimer);
+                clearInterval(timer);
+            }
+        }, []);
+    }
+
     return (
         <MenuLayout>
             <div className={globalStyle.contentMargin} >
@@ -47,13 +95,16 @@ const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo
                     style={{ maxWidth: '300px' }}
                 />
 
-                <Button
-                    type="primary"
-                    onClick={() => setDrawerVisible(true)}
-                    style={{ float: 'right' }}
-                >
-                    <PlusOutlined /> { drawerTitle }
-                </Button>
+                <div style={{ float: 'right', display: 'flex', alignItems: 'center' }}>
+                    { enableRefresh ? refresher: '' }
+
+                    <Button
+                        type="primary"
+                        onClick={() => setDrawerVisible(true)}
+                    >
+                        <PlusOutlined /> { drawerTitle }
+                    </Button>
+                </div>
             </div>
 
             <ModelDrawer

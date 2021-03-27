@@ -42,7 +42,7 @@ const ChannelPage = () => {
     // ========== presentation channel ==========
     const [ dataSource, setDataSource ] = useState([]);
     const [ sortedInfo, setSortedInfo ] = useState({});
-    const refresh = async () => {
+    const refreshAsync = async () => {
         try {
             const { data: { payload: channels } } = await api.listChannels();
             setDataSource(channels);
@@ -52,12 +52,12 @@ const ChannelPage = () => {
     };
 
     useEffect(() => {
-        refresh();
+        refreshAsync();
     }, []);
 
     const handleSubmit = async () => {
         await interactWithMessage(() => api.createChannel(channel))();
-        await refresh();
+        await refreshAsync();
     };
 
     const columns = [
@@ -111,6 +111,10 @@ const ChannelPage = () => {
             dataSource={dataSource}
             rowKey={ record => `${record.name}-${record.network}` }
             setSortedInfo={setSortedInfo}
+
+            enableRefresh
+            onRefreshAsync={refreshAsync}
+
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>

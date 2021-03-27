@@ -38,7 +38,7 @@ const OrganizationPage = () => {
     const [ sortedInfo, setSortedInfo ] = useState({});
     const [ filteredInfo, setFilteredInfo ] = useState({});
 
-    const refresh = async () => {
+    const refreshAsync = async () => {
         try {
             const { data: { payload: orgs } } = await api.listOrganizations();
             setDataSource(orgs);
@@ -48,20 +48,13 @@ const OrganizationPage = () => {
     };
 
     useEffect(() => {
-        refresh();
+        refreshAsync();
     }, []);
 
     const handleSubmit = async () => {
         await interactWithMessage(() => api.createOrganization(organization))();
-        await refresh();
+        await refreshAsync();
     };
-
-    // this feature has been removed
-    //
-    // const handleDeleteOrganization = organizationUrl => async () => {
-    //     await interactWithMessage(() => api.deleteOrganization(organizationUrl))();
-    //     await refresh();
-    // }
 
     const columns = [
         {
@@ -88,20 +81,6 @@ const OrganizationPage = () => {
             title: '所属网络',
             render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
         },
-        // this feature has been removed
-        //
-        // {
-        //     key: 'actions',
-        //     dataIndex: 'actions',
-        //     title: '操作',
-        //     render: (_, { name }) => {
-        //         return (
-        //             <Button.Group>
-        //                 <Button onClick={handleDeleteOrganization(name)}>删除</Button>
-        //             </Button.Group>
-        //         );
-        //     }
-        // }
     ];
 
     return (
@@ -112,6 +91,10 @@ const OrganizationPage = () => {
             rowKey={ R.prop('name') }
             setSortedInfo={setSortedInfo}
             setFilteredInfo={setFilteredInfo}
+
+            enableRefresh
+            onRefreshAsync={refreshAsync}
+
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
