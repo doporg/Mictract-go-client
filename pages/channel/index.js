@@ -1,4 +1,4 @@
-import {Badge, Col, Form, Row, Select, Tag} from "antd";
+import {Badge, Col, Form, Input, Row, Select, Tag} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
@@ -8,6 +8,7 @@ import {interactWithMessage} from "pages/index";
 const ChannelPage = () => {
     // ========== add new channel ==========
     const [ channel, setChannel ] = useState({
+        nickname: '',
         network: '',
         organizations: [],
     });
@@ -62,9 +63,16 @@ const ChannelPage = () => {
 
     const columns = [
         {
+            key: 'nickname',
+            dataIndex: 'nickname',
+            title: '昵称',
+            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
+            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
+        },
+        {
             key: 'name',
             dataIndex: 'name',
-            title: '名称 / URL',
+            title: '名称',
             sorter: (a, b) => a.name.localeCompare(b.name),
             sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
         },
@@ -118,6 +126,13 @@ const ChannelPage = () => {
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
+                <Form.Item label={'昵称'} rules={{ require: true, message: '请填写昵称' }}>
+                    <Input
+                        placeholder={'请填写昵称'}
+                        onChange={(e) => setChannelByKey('nickname')(e.target.value)}
+                    />
+                </Form.Item>
+
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>

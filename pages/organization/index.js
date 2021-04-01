@@ -1,4 +1,4 @@
-import {Button, Col, Form, InputNumber, message, Row, Select, Slider, Tag} from "antd";
+import {Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
 import * as R from 'ramda';
@@ -8,6 +8,7 @@ import {interactWithMessage} from "pages/index";
 const OrganizationPage = () => {
     // ========== add new organization ==========
     const [ organization, setOrganization ] = useState({
+        nickname: '',
         networkUrl: '',
         peerCount: 2,
     });
@@ -58,6 +59,13 @@ const OrganizationPage = () => {
 
     const columns = [
         {
+            key: 'nickname',
+            dataIndex: 'nickname',
+            title: '昵称',
+            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
+            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
+        },
+        {
             key: 'name',
             dataIndex: 'name',
             title: '名称',
@@ -98,6 +106,13 @@ const OrganizationPage = () => {
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
+                <Form.Item label={'昵称'} rules={{ require: true, message: '请填写昵称' }}>
+                    <Input
+                        placeholder={'请填写昵称'}
+                        onChange={(e) => setOrganizationByKey('nickname')(e.target.value)}
+                    />
+                </Form.Item>
+
                 <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>
                     <Row gutter={16}>
                         <Col span={12}>
