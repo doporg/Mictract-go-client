@@ -49,7 +49,6 @@ const ModelPage = ({
     const [ refreshSecond, setRefreshSecond ] = useState(0);
 
     const refresh = async () => {
-        console.log('time to refresh');
         setRefreshing(true);
         await onRefreshAsync();
         setRefreshing(false);
@@ -123,7 +122,12 @@ const ModelPage = ({
                 loading={tableLoading}
                 rowKey={rowKey}
                 columns={columns}
-                dataSource={dataSource.filter(x => x.name.toLowerCase().includes(searchName.toLowerCase()))}
+                dataSource={dataSource.filter(x => {
+                    if (x.nickname !== undefined)
+                        return x.nickname.toLowerCase().includes(searchName.toLowerCase())
+                    console.log(x);
+                    return x.name.toLowerCase().includes(searchName.toLowerCase())
+                })}
                 onChange={handleChange}
                 pagination={{
                     showSizeChanger: true,
