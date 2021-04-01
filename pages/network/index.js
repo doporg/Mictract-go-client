@@ -1,4 +1,4 @@
-import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
+import {Badge, Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
@@ -12,10 +12,12 @@ import {interactWithMessage} from "pages/index";
 const NetworkPage = () => {
     // ========== add new network ==========
     const [ network, setNetwork ] = useState({
+        nickname: '',
         consensus: 'solo',
         tlsEnabled: true,
         ordererCount: 1,
         peerCounts: [ 2, 2 ],
+        organizationNicknames: [ 'org1', 'org2' ],
     });
 
     const setNetworkByKey = (key) => {
@@ -27,13 +29,20 @@ const NetworkPage = () => {
 
     const setOrgCount = (count) => {
         const diff = count - network.peerCounts.length;
-        const compute = diff < 0 ?
+        const reduceOrExpand = fill => diff < 0 ?
             R.take(count) :
-            R.concat(R.__, R.repeat(2)(diff));
-        const peerCounts = compute(network.peerCounts)
+            R.concat(R.__, R.repeat(fill)(diff));
+
+        const peerCounts = reduceOrExpand(2)(network.peerCounts);
+        const organizationNicknames = reduceOrExpand('orgX')(network.organizationNicknames)
+            .map((nickname, idx) => {
+                if (nickname === 'orgX')
+                    return `org${idx+1}`;
+                return nickname;
+            });
 
         setNetwork( network =>
-            R.mergeRight(network, { peerCounts })
+            R.mergeRight(network, { peerCounts, organizationNicknames })
         )
     }
 
@@ -41,6 +50,14 @@ const NetworkPage = () => {
         setNetwork(network => {
             // NOTE: here use shallow copy because diffing algo is based on the pointer address.
             network.peerCounts[key] = value;
+            return { ...network };
+        })
+    }
+
+    const setOrganizationNicknameByKey = (key, value) => {
+        setNetwork(network => {
+            // NOTE: here use shallow copy because diffing algo is based on the pointer address.
+            network.organizationNicknames[key] = value;
             return { ...network };
         })
     }
@@ -54,6 +71,7 @@ const NetworkPage = () => {
     const refreshAsync = async () => {
         try {
             const { data: {payload: networks} } = await api.listNetworks();
+            if (networks === undefined) console.log('error');
             setDataSource(networks);
         } catch (e) {
             message.error(e.message);
@@ -75,6 +93,13 @@ const NetworkPage = () => {
     }
 
     const columns = [
+        {
+            key: 'nickname',
+            dataIndex: 'nickname',
+            title: '昵称',
+            sorter: (a, b) => a.name.localeCompare(b.name),
+            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
+        },
         {
             key: 'name',
             dataIndex: 'name',
@@ -181,6 +206,13 @@ const NetworkPage = () => {
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
+                <Form.Item label={'昵称'} rules={{ require: true, message: '请填写昵称' }}>
+                    <Input
+                        placeholder={'请填写昵称'}
+                        onChange={(e) => setNetworkByKey('nickname')(e.target.value)}
+                    />
+                </Form.Item>
+
                 <Row gutter={16}>
                     <Col span={18}>
                         <Form.Item label={'共识协议'} rules={{ require: true, message: '请选择共识协议' }}>
@@ -219,7 +251,12 @@ const NetworkPage = () => {
                 </Row>
 
                 <Form.Item label={'节点个数'}>
-                    <PeerCountTable onChange={setPeerCountsByKey} peerCounts={network.peerCounts} />
+                    <PeerCountTable
+                        onPeerCountChange={setPeerCountsByKey}
+                        onOrganizationNicknameChange={setOrganizationNicknameByKey}
+                        peerCounts={network.peerCounts}
+                        organizationNicknames={network.organizationNicknames}
+                    />
                 </Form.Item>
             </Form>
         </ModelPage>
