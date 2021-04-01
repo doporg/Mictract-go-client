@@ -16,7 +16,7 @@ export default (req, res) => {
                         .find(R.propEq('name', networkUrl));
 
                     res.status(200)
-                        .json(network.organizations);
+                        .json({payload: network.organizations});
                     break;
 
                 default:
@@ -29,7 +29,7 @@ export default (req, res) => {
                     }
 
                     res.status(200)
-                        .json(orgs);
+                        .json({payload: orgs});
             }
             break;
 

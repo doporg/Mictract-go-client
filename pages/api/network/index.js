@@ -9,7 +9,7 @@ export default (req, res) => {
     switch (method) {
         case 'GET':
             res.status(200)
-                .json(networkSource);
+                .json({payload: networkSource});
             break;
 
         case 'POST':

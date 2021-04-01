@@ -23,7 +23,7 @@ export default (req, res) => {
                     const { networkUrl } = req.query;
 
                     res.status(200)
-                        .json(peersByNetwork(networkUrl));
+                        .json({payload: peersByNetwork(networkUrl)});
                     break;
 
                 case req.query.organization !== undefined:
@@ -31,7 +31,7 @@ export default (req, res) => {
                     const { organization } = req.query;
 
                     res.status(200)
-                        .json(peersByOrganization(organization));
+                        .json({payload: peersByOrganization(organization)});
                     break;
             }
 

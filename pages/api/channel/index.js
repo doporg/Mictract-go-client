@@ -8,15 +8,35 @@ export default (req, res) => {
 
     switch (method) {
         case 'GET':
-            let channels = [];
-            for (const net of networkSource) {
-                const netChannel = [ ...net.channels ];
-                netChannel.forEach(c => c.network = net.name);
-                channels = [ ...channels, ...netChannel];
-            }
+            switch (true) {
+                case req.query.networkUrl !== undefined:
+                    // net1.com
+                    const { networkUrl } = req.query;
+                    const network = networkSource
+                        .find(R.propEq('name', networkUrl));
 
-            res.status(200)
-                .json(channels);
+                    let channelsInNetwork = [];
+                    const netChannel = [ ...network.channels ];
+                    netChannel.forEach(c => c.network = network.name);
+                    channelsInNetwork = netChannel;
+
+                    console.log(channelsInNetwork);
+                    res.status(200)
+                        .json({payload: channelsInNetwork});
+                    break;
+
+                default:
+                    let channels = [];
+                    for (const net of networkSource) {
+                        const netChannel = [ ...net.channels ];
+                        netChannel.forEach(c => c.network = net.name);
+                        channels = [ ...channels, ...netChannel];
+                    }
+
+                    res.status(200)
+                        .json({payload: channels});
+                    break;
+            }
             break;
 
         case 'POST':
