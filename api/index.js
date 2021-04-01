@@ -48,13 +48,6 @@ const api = {
           .body({url})
           .done(),
 
-  // Example:
-  // { networkUrl: 'net1.com' }
-  listOrganizationsByNetwork: (networkUrl) =>
-      Api('GET', `/api/organization`)
-          .query({networkUrl})
-          .done(),
-
 
   // ==================== channel ====================
   listChannels: () =>
@@ -73,6 +66,13 @@ const api = {
           .body(channel)
           .done(),
 
+  // Example:
+  // { networkUrl: 'net1.com' }
+  listChannelsByNetwork: (networkUrl) =>
+      Api('GET', `/api/channel`)
+          .query({networkUrl})
+          .done(),
+
 
   // ==================== organization ====================
   listOrganizations: () =>
@@ -88,12 +88,28 @@ const api = {
           .body(organization)
           .done(),
 
-  // this feature is dead
-  // // Example:
-  // // { url: 'org1.net1.com' }
-  // deleteOrganization: (url) =>
-  //     Api('DELETE', `/api/organization`)
-  //         .body({url}),
+  // Example:
+  // { networkUrl: 'net1.com' }
+  listOrganizationsByNetwork: (networkUrl) =>
+      Api('GET', `/api/organization`)
+          .query({networkUrl})
+          .done(),
+
+
+  // ==================== chaincode ====================
+  listChaincodes: () =>
+      Api('GET', `/api/chaincode`).done(),
+
+  createChaincode: (chaincode) =>
+      Api('POST', `/api/chaincode`)
+          .body(chaincode)
+          .done(),
+
+  invokeChaincode: (id) =>
+      Api('POST', `/api/chaincode/${id}`)
+          .done(),
+
+
 }
 
 export default api;
