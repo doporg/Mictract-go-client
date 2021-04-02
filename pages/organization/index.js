@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import api from 'api';
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
 
 const OrganizationPage = () => {
     // ========== add new organization ==========
@@ -21,7 +21,9 @@ const OrganizationPage = () => {
                 const { data: { payload: networks } } = await api.listNetworks();
                 setNetworks(networks.map(R.prop('name')));
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })();
     }, []);
@@ -44,7 +46,9 @@ const OrganizationPage = () => {
             const { data: { payload: orgs } } = await api.listOrganizations();
             setDataSource(orgs);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'refreshing',
+            });
         }
     };
 
@@ -53,7 +57,10 @@ const OrganizationPage = () => {
     }, []);
 
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createOrganization(organization))();
+        await interactWithMessage(
+            () => api.createOrganization(organization),
+            'create organization',
+        )();
         await refreshAsync();
     };
 

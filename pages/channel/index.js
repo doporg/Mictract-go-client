@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
 
 const ChannelPage = () => {
     // ========== add new channel ==========
@@ -21,7 +21,9 @@ const ChannelPage = () => {
                 const { data: { payload: networks } } = await api.listNetworks();
                 setNetworks(networks.map(R.prop('name')));
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })();
     }, []);
@@ -36,7 +38,9 @@ const ChannelPage = () => {
             const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl)
             setOrganizationsInNetwork(orgs);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'list organizations by network',
+            });
         }
     };
 
@@ -48,7 +52,9 @@ const ChannelPage = () => {
             const { data: { payload: channels } } = await api.listChannels();
             setDataSource(channels);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'refreshing',
+            });
         }
     };
 
@@ -57,7 +63,10 @@ const ChannelPage = () => {
     }, []);
 
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createChannel(channel))();
+        await interactWithMessage(
+            () => api.createChannel(channel),
+            'create channel',
+        )();
         await refreshAsync();
     };
 

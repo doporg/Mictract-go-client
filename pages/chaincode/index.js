@@ -4,7 +4,7 @@ import api from 'api';
 import {CheckOutlined, CloseOutlined, UploadOutlined} from "@ant-design/icons";
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
 
 const NetworkPage = () => {
     // ========== add new chaincode ==========
@@ -12,12 +12,13 @@ const NetworkPage = () => {
         file: undefined,
         nickname: '',
         label: '',
-        policy: 'OR(\'org1MSP.member\')',
+        policy: '',
         version: '',
         sequence: 1,
         initRequired: true,
-        channelName: '',
         network: '',
+        organization: '',
+        peers: [],
     });
 
     const setChaincodeByKey = (key) => {
@@ -28,7 +29,8 @@ const NetworkPage = () => {
     }
 
     const [ networks, setNetworks ] = useState([]);
-    const [ channelsInNetwork, setChannelsInNetwork ] = useState([]);
+    const [ organizationsInNetwork, setOrganizationsInNetwork ] = useState([]);
+    const [ peersInOrganization, setPeersInOrganization ] = useState([]);
 
     useEffect(() => {
         (async () => {
@@ -36,19 +38,36 @@ const NetworkPage = () => {
                 const { data: { payload: networks } } = await api.listNetworks();
                 setNetworks(networks.map(R.prop('name')));
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })();
     }, []);
+
+    const onOrganizationChange = async organizationUrl => {
+        setChaincodeByKey('organization')(organizationUrl);
+
+        try {
+            const { data: { payload: peers } } = await api.listPeersByOrganization(organizationUrl)
+            setPeersInOrganization(peers);
+        } catch (e) {
+            handleErrorWithMessage(e, {
+                message: 'list peers by organization',
+            });
+        }
+    };
 
     const onNetworkChange = async networkUrl => {
         setChaincodeByKey('network')(networkUrl);
 
         try {
-            const { data: { payload: orgs } } = await api.listChannelsByNetwork(networkUrl)
-            setChannelsInNetwork(orgs);
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl)
+            setOrganizationsInNetwork(orgs);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'list organizations by network',
+            });
         }
     };
 
@@ -62,7 +81,9 @@ const NetworkPage = () => {
             const { data: {payload: chaincodes} } = await api.listChaincodes();
             setDataSource(chaincodes);
         } catch (e) {
-            message.error(e.message);
+            handleErrorWithMessage(e, {
+                message: 'refreshing',
+            });
         }
     };
 
@@ -75,12 +96,18 @@ const NetworkPage = () => {
         for (const key of Object.keys(chaincode))
             form.append(key, chaincode[key]);
 
-        await interactWithMessage(() => api.createChaincode(form))();
+        await interactWithMessage(
+            () => api.createChaincode(form),
+            'create chaincode',
+        )();
         await refreshAsync();
     };
 
     const handleInvokeChaincode = chaincodeName => async () => {
-        await interactWithMessage(() => api.invokeChaincode(networkUrl))();
+        await interactWithMessage(
+            () => api.invokeChaincode(networkUrl),
+            'invoke chaincode'
+        )();
         await refreshAsync();
     };
 
@@ -210,8 +237,7 @@ const NetworkPage = () => {
 
                 <Form.Item label={'安装策略'} rules={{ require: true, message: '请填写安装策略' }}>
                     <Input
-                        placeholder={'请填写安装策略'}
-                        defaultValue={'OR(\'org1MSP.member\')'}
+                        placeholder={"默认值为 OR('org1MSP.member')"}
                         onChange={(e) => setChaincodeByKey('policy')(e.target.value)}
                     />
                 </Form.Item>
@@ -258,15 +284,23 @@ const NetworkPage = () => {
                     <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={chaincode.network}>
                         {
                             networks
-                                .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                .map(net => <Select.Option key={net} value={net}>{net.split('.')[0]}</Select.Option>)
                         }
                     </Select>
                 </Form.Item>
-                <Form.Item label={'所属通道'} rules={{ require: true, message: '请填写所属通道' }}>
-                    <Select placeholder='请选择所属通道' onChange={setChaincodeByKey('channelName')} value={chaincode.channel}>
+                <Form.Item label={'所属组织'} rules={{ require: true, message: '请填写所属组织' }}>
+                    <Select placeholder='请选择所属组织' onChange={onOrganizationChange} value={chaincode.organization}>
                         {
-                            channelsInNetwork
-                                .map(({name}) => <Select.Option key={name} value={name}>{name}</Select.Option>)
+                            organizationsInNetwork
+                                .map(({name}) => <Select.Option key={name} value={name}>{name.split('.')[0]}</Select.Option>)
+                        }
+                    </Select>
+                </Form.Item>
+                <Form.Item label={'包含Peer'} rules={{ require: true, message: '请填写包含Peer' }}>
+                    <Select placeholder='请选择包含Peer' mode="tags" onChange={setChaincodeByKey('peers')}>
+                        {
+                            peersInOrganization
+                                .map(({name}) => <Select.Option key={name} value={name}>{name.split('.')[0]}</Select.Option>)
                         }
                     </Select>
                 </Form.Item>

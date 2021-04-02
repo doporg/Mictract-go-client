@@ -7,7 +7,7 @@ import * as R from 'ramda';
 import {useRouter} from "next/router";
 import ModelPage from "components/ModelPage/ModelPage";
 import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
 
 const NetworkPage = () => {
     // ========== add new network ==========
@@ -71,10 +71,11 @@ const NetworkPage = () => {
     const refreshAsync = async () => {
         try {
             const { data: {payload: networks} } = await api.listNetworks();
-            if (networks === undefined) console.log('error');
             setDataSource(networks);
         } catch (e) {
-            message.error(e.message);
+            handleErrorWithMessage(e, {
+                message: 'refreshing'
+            });
         }
     };
 
@@ -83,12 +84,18 @@ const NetworkPage = () => {
     }, []);
 
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createNetwork(network))();
+        await interactWithMessage(
+            () => api.createNetwork(network),
+            'create network',
+        )();
         await refreshAsync();
     };
 
     const handleDeleteNetwork = networkUrl => async () => {
-        await interactWithMessage(() => api.deleteNetwork(networkUrl))();
+        await interactWithMessage(
+            () => api.deleteNetwork(networkUrl),
+            'delete network',
+        )();
         await refreshAsync();
     }
 

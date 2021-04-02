@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
 
 const UserPage = () => {
     // ========== add new user ==========
@@ -30,7 +30,9 @@ const UserPage = () => {
                 const { data: { payload: networks } } = await api.listNetworks();
                 setNetworks( networks.map(R.prop('name')) )
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })()
     }, []);
@@ -43,7 +45,9 @@ const UserPage = () => {
             const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl);
             setOrgsInNetwork(orgs);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'list organizations by network',
+            });
         }
     };
 
@@ -56,7 +60,9 @@ const UserPage = () => {
             const { data: { payload: users } } = await api.listUsers();
             setDataSource(users);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'refreshing',
+            });
         }
     };
 
@@ -65,12 +71,18 @@ const UserPage = () => {
     }, []);
 
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createUser(user))();
+        await interactWithMessage(
+            () => api.createUser(user),
+            'create user',
+        )();
         await refresh();
     };
 
     const handleDeleteUser = userUrl => async () => {
-        await interactWithMessage(() => api.deleteUser(userUrl))();
+        await interactWithMessage(
+            () => api.deleteUser(userUrl),
+            'delete user',
+        )();
         await refresh();
     }
 
