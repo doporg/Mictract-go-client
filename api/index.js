@@ -110,6 +110,12 @@ const api = {
           .done(),
 
 
+  // ==================== peer ====================
+
+  listPeersByOrganization: (organizationUrl) =>
+      Api('GET', `/api/peer`)
+          .query({organizationUrl})
+          .done(),
 }
 
 export default api;
