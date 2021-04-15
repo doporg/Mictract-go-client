@@ -9,8 +9,8 @@ const ChannelPage = () => {
     // ========== add new channel ==========
     const [ channel, setChannel ] = useState({
         nickname: '',
-        network: '',
-        organizations: [],
+        networkID: '',
+        organizationIDs: [],
     });
     const [ networks, setNetworks ] = useState([]);
     const [ organizationsInNetwork, setOrganizationsInNetwork ] = useState([]);
@@ -19,7 +19,7 @@ const ChannelPage = () => {
         (async () => {
             try {
                 const { data: { payload: networks } } = await api.listNetworks();
-                setNetworks(networks.map(R.prop('name')));
+                setNetworks(networks);
             } catch (e) {
                 handleErrorWithMessage(e, {
                     message: 'list networks',
@@ -31,11 +31,11 @@ const ChannelPage = () => {
     const setChannelByKey = key => value =>
         setChannel( channel => R.mergeRight(channel, { [key]: value }));
 
-    const onNetworkChange = async networkUrl => {
-        setChannelByKey('network')(networkUrl);
+    const onNetworkChange = async networkID => {
+        setChannelByKey('networkID')(networkID);
 
         try {
-            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl)
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkID)
             setOrganizationsInNetwork(orgs);
         } catch (e) {
             handleErrorWithMessage(e, {
@@ -72,35 +72,36 @@ const ChannelPage = () => {
 
     const columns = [
         {
+            key: 'id',
+            dataIndex: 'id',
+            title: 'ID',
+            sorter: (a, b) => a.id - b.id,
+            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
+        },
+        {
             key: 'nickname',
             dataIndex: 'nickname',
             title: '昵称',
             sorter: (a, b) => a.nickname.localeCompare(b.nickname),
             sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
         },
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
-        },
+        // TODO: change name into id
         {
             key: 'organizations',
             dataIndex: 'organizations',
-            title: '包含组织',
+            title: '包含组织ID',
             render: R.pipe(
-                R.map( name => <Tag key={name} color={'purple'}>{name.split('.')[0]}</Tag>),
+                R.map( id => <Tag key={id} color={'purple'}>{id}</Tag>),
                 R.splitEvery(5),
                 R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
                 R.flatten,
             ),
         },
         {
-            key: 'network',
-            dataIndex: 'network',
-            title: '所属网络',
-            render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
+            key: 'networkID',
+            dataIndex: 'networkID',
+            title: '所属网络ID',
+            render: value => <Tag key={value} color={'green'}>{value}</Tag>
         },
         {
             key: 'status',
@@ -148,18 +149,20 @@ const ChannelPage = () => {
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={channel.network}>
                                 {
                                     networks
-                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                        .map(({ id: networkID, nickname }) =>
+                                            <Select.Option key={networkID} value={networkID}>{`${networkID} - ${nickname}`}</Select.Option>
+                                        )
                                 }
                             </Select>
                         </Form.Item>
                     </Col>
                     <Col span={24}>
                         <Form.Item label={'包含组织'} rules={{ require: true, message: '请填写包含节点' }}>
-                            <Select placeholder='请填写包含组织' mode="tags" onChange={setChannelByKey('organizations')}>
+                            <Select placeholder='请填写包含组织' mode="tags" onChange={setChannelByKey('organizationIDs')}>
                                 {
                                     organizationsInNetwork
-                                        .map(({name}) =>
-                                            <Select.Option key={name} value={name}>{name.split('.')[0]}</Select.Option>
+                                        .map(({ id: organizationID, nickname }) =>
+                                            <Select.Option key={organizationID} value={organizationID}>{`${organizationID} - ${nickname}`}</Select.Option>
                                         )
                                 }
                             </Select>

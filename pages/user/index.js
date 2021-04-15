@@ -10,8 +10,7 @@ const UserPage = () => {
     const [ user, setUser ] = useState({
         nickname: '',
         role: 'user',
-        organization: undefined,
-        network: undefined,
+        organizationID: undefined,
         password: '',
     });
 
@@ -28,7 +27,7 @@ const UserPage = () => {
         (async () => {
             try {
                 const { data: { payload: networks } } = await api.listNetworks();
-                setNetworks( networks.map(R.prop('name')) )
+                setNetworks(networks);
             } catch (e) {
                 handleErrorWithMessage(e, {
                     message: 'list networks',
@@ -37,13 +36,11 @@ const UserPage = () => {
         })()
     }, []);
 
-    const [ orgsInNetwork, setOrgsInNetwork ] = useState([]);
-    const onNetworkChange = async networkUrl => {
-        setUserByKey('network')(networkUrl);
-
+    const [ organizationsInNetwork, setOrganizationsInNetwork ] = useState([]);
+    const onNetworkChange = async networkID => {
         try {
-            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl);
-            setOrgsInNetwork(orgs);
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork({networkID});
+            setOrganizationsInNetwork(orgs);
         } catch (e) {
             handleErrorWithMessage(e, {
                 message: 'list organizations by network',
@@ -78,9 +75,9 @@ const UserPage = () => {
         await refresh();
     };
 
-    const handleDeleteUser = userUrl => async () => {
+    const handleDeleteUser = userID => async () => {
         await interactWithMessage(
-            () => api.deleteUser(userUrl),
+            () => api.deleteUser({id: userID}),
             'delete user',
         )();
         await refresh();
@@ -88,11 +85,11 @@ const UserPage = () => {
 
     const columns = [
         {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称 / URL',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
+            key: 'id',
+            dataIndex: 'id',
+            title: 'ID',
+            sorter: (a, b) => a.id - b.id,
+            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
         },
         {
             key: 'nickname',
@@ -119,31 +116,25 @@ const UserPage = () => {
             }
         },
         {
-            key: 'organization',
-            dataIndex: 'organization',
-            title: '所属组织',
-            render: value => {
-                const org = value.split('.')[0];
-                if (org === 'orderer')
-                    return <Tag color={'cyan'}>{org}</Tag>;
-                else
-                    return <Tag color={'geekblue'}>{org}</Tag>;
-            }
+            key: 'organizationID',
+            dataIndex: 'organizationID',
+            title: '所属组织ID',
+            render: value => <Tag color={'geekblue'}>{value}</Tag>
         },
         {
-            key: 'network',
-            dataIndex: 'network',
-            title: '所属网络',
-            render: value => <Tag color={'green'}>{value.split('.')[0]}</Tag>
+            key: 'networkID',
+            dataIndex: 'networkID',
+            title: '所属网络ID',
+            render: value => <Tag color={'green'}>{value}</Tag>
         },
         {
             key: 'actions',
             dataIndex: 'actions',
             title: '操作',
-            render: (_, { key }) => {
+            render: (_, { id }) => {
                 return (
-                    <Button.Group>
-                        <Button onClick={handleDeleteUser(key)}>删除</Button>
+                    <Button.Group key={id}>
+                        <Button onClick={handleDeleteUser(id)}>删除</Button>
                     </Button.Group>
                 );
             }
@@ -186,18 +177,20 @@ const UserPage = () => {
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={user.network}>
                                 {
                                     networks
-                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                        .map(({ id: networkID, nickname }) =>
+                                            <Select.Option key={networkID} value={networkID}>{`${networkID} - ${nickname}`}</Select.Option>
+                                        )
                                 }
                             </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label={'所属组织'} rules={{ require: true, message: '请填写所属组织' }}>
-                            <Select placeholder='请选择所属组织' onChange={setUserByKey('organization')} value={user.organization}>
+                            <Select placeholder='请选择所属组织' onChange={setUserByKey('organizationID')} value={user.organization}>
                                 {
-                                    orgsInNetwork
-                                        .map(({ name }) =>
-                                            <Select.Option key={name} value={name}>{name}</Select.Option>
+                                    organizationsInNetwork
+                                        .map(({ id: organizationID, nickname }) =>
+                                            <Select.Option key={organizationID} value={organizationID}>{`${organizationID} - ${nickname}`}</Select.Option>
                                         )
                                 }
                             </Select>

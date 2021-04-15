@@ -91,9 +91,9 @@ const NetworkPage = () => {
         await refreshAsync();
     };
 
-    const handleDeleteNetwork = networkUrl => async () => {
+    const handleDeleteNetwork = networkID => async () => {
         await interactWithMessage(
-            () => api.deleteNetwork(networkUrl),
+            () => api.deleteNetwork({ id: networkID }),
             'delete network',
         )();
         await refreshAsync();
@@ -101,18 +101,18 @@ const NetworkPage = () => {
 
     const columns = [
         {
+            key: 'id',
+            dataIndex: 'id',
+            title: 'ID',
+            sorter: (a, b) => a.id - b.id,
+            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
+        },
+        {
             key: 'nickname',
             dataIndex: 'nickname',
             title: '昵称',
             sorter: (a, b) => a.name.localeCompare(b.name),
             sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
         },
         {
             key: 'consensus',
@@ -134,10 +134,10 @@ const NetworkPage = () => {
         {
             key: 'orderers',
             dataIndex: 'orderers',
-            title: '排序节点',
+            title: '排序节点ID',
             render: value => {
                 const compute = R.pipe(
-                    R.map(v => <Tag color='cyan' key={v}> { v.split('.')[0] } </Tag>),
+                    R.map(({ id: ordererID }) => <Tag color='cyan' key={ordererID}> { ordererID } </Tag>),
                     R.splitEvery(3),
                     R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
                     R.flatten()
@@ -148,10 +148,10 @@ const NetworkPage = () => {
         {
             key: 'organizations',
             dataIndex: 'organizations',
-            title: '组织',
+            title: '组织ID',
             render: value => {
                 const compute = R.pipe(
-                    R.map(({name: v}) => <Tag color='geekblue' key={v}> { v.split('.')[0] } </Tag>),
+                    R.map(({ id: organizationID }) => <Tag color='geekblue' key={organizationID}> { organizationID } </Tag>),
                     R.splitEvery(5),
                     R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
                     R.flatten()
@@ -186,12 +186,12 @@ const NetworkPage = () => {
             key: 'actions',
             dataIndex: 'actions',
             title: '操作',
-            render: (_, { key, name }) => {
+            render: (_, { id: networkID }) => {
                 // TODO: link to `/monitor/[id]`
                 return (
-                    <Button.Group key={name}>
-                        <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
-                        <Button onClick={handleDeleteNetwork(name)}>删除</Button>
+                    <Button.Group key={networkID}>
+                        <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>
+                        <Button onClick={handleDeleteNetwork(networkID)}>删除</Button>
                     </Button.Group>
                 );
             }

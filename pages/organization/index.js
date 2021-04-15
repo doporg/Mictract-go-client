@@ -9,7 +9,7 @@ const OrganizationPage = () => {
     // ========== add new organization ==========
     const [ organization, setOrganization ] = useState({
         nickname: '',
-        networkUrl: '',
+        networkID: '',
         peerCount: 2,
     });
 
@@ -19,7 +19,7 @@ const OrganizationPage = () => {
         (async () => {
             try {
                 const { data: { payload: networks } } = await api.listNetworks();
-                setNetworks(networks.map(R.prop('name')));
+                setNetworks(networks);
             } catch (e) {
                 handleErrorWithMessage(e, {
                     message: 'list networks',
@@ -66,19 +66,20 @@ const OrganizationPage = () => {
 
     const columns = [
         {
+            key: 'id',
+            dataIndex: 'id',
+            title: 'ID',
+            sorter: (a, b) => a.id - b.id,
+            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
+        },
+        {
             key: 'nickname',
             dataIndex: 'nickname',
             title: '昵称',
             sorter: (a, b) => a.nickname.localeCompare(b.nickname),
             sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
         },
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
-        },
+        // TODO: change url into id model
         {
             key: 'peers',
             dataIndex: 'peers',
@@ -91,10 +92,10 @@ const OrganizationPage = () => {
             ),
         },
         {
-            key: 'network',
-            dataIndex: 'network',
-            title: '所属网络',
-            render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
+            key: 'networkID',
+            dataIndex: 'networkID',
+            title: '所属网络ID',
+            render: value => <Tag key={value} color={'green'}>{value}</Tag>
         },
     ];
 
@@ -123,10 +124,12 @@ const OrganizationPage = () => {
                 <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Select placeholder='请选择所属网络' onChange={setOrganizationByKey('networkUrl')} value={organization.networkUrl}>
+                            <Select placeholder='请选择所属网络' onChange={setOrganizationByKey('networkID')} value={organization.networkUrl}>
                                 {
                                     networks
-                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                        .map(({ id: networkID, nickname }) =>
+                                            <Select.Option key={networkID} value={networkID}>{`${networkID} - ${nickname}`}</Select.Option>
+                                        )
                                 }
                             </Select>
                         </Col>
