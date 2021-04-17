@@ -1,4 +1,4 @@
-import MenuLayout from "components/MenuLayout/MenuLayout";
+import MenuLayout, {handleErrorWithMessage} from "components/MenuLayout/MenuLayout";
 import {Button, Input, message, Table, Tooltip} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
@@ -6,24 +6,26 @@ import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
 import {interval, Observable, Subject} from "rxjs";
 import {debounceTime, throttleTime} from "rxjs/operators";
 import ModelDrawer from "../ModelDrawer/ModelDrawer";
+import RefreshTimer from "../RefreshTimer/RefreshTimer";
 
 const { Search } = Input;
 
 const
     THROTTLE_TIME = 1000,
-    DEBOUNCE_TIME = 100,
-    REFRESH_INTERVAL = 30 * 1000;
+    DEBOUNCE_TIME = 100;
 
 const ModelPage = ({
-                       columns, dataSource, rowKey, setSortedInfo, setFilteredInfo,
-                       enableRefresh, onRefreshAsync,
-                       drawerTitle, handleSubmit, children }) => {
+                       drawerTitle,
+                       columns, dataSourceAsync, rowKey = 'id',
+                       refreshEnabled, refreshSubject,
+                       handleSubmit,
+                       children }) => {
     const [ tableLoading, setTableLoading ] = useState(false);
     const [ drawerVisible, setDrawerVisible ] = useState(false);
-    const [ searchName, setSearchName ] = useState('');
 
-    const handleSearch = (value) => {
-        setSearchName(value);
+    const [ searchName, setSearchName ] = useState('');
+    const handleSearch = (searchName) => {
+        setSearchName(searchName);
         setTableLoading(false);
     };
 
@@ -32,59 +34,29 @@ const ModelPage = ({
         .pipe(
             throttleTime(THROTTLE_TIME),
             debounceTime(DEBOUNCE_TIME),
-        ).subscribe(handleSearch)
+        ).subscribe(handleSearch);
+
     searchInputChange$
         .subscribe(() => {
             setTableLoading(true);
-        })
+        });
 
-    const handleChange = (pagination, filters, sorter) => {
-        if (setFilteredInfo)
-            setFilteredInfo(filters);
-        if (setSortedInfo)
-            setSortedInfo(sorter);
-    }
-
-    const [ refreshing, setRefreshing ] = useState(false);
-    const [ refreshSecond, setRefreshSecond ] = useState(0);
-
-    const refresh = async () => {
-        setRefreshing(true);
-        await onRefreshAsync();
-        setRefreshing(false);
-        setRefreshSecond(0);
+    const [ dataSource, setDataSource ] = useState([]);
+    const refreshAsync = async () => {
+        try {
+            const { data: {payload: dataSource} } = await dataSourceAsync();
+            setDataSource(dataSource);
+        } catch (e) {
+            handleErrorWithMessage(e, {
+                message: 'refreshing',
+            });
+        }
     };
+    useEffect(() => {
+        refreshAsync()
+    }, []);
 
-    const refresher = (
-        <div onClick={refresh} style={{ marginRight: '10px', cursor: 'pointer' }}>
-            <Tooltip title={`每${REFRESH_INTERVAL / 1000}秒自动刷新列表`}>
-                {
-                    refreshing ?
-                        <>
-                            <SyncOutlined spin />
-                            <p style={{ display: 'inline', color: 'gray' }}> 自动刷新中 </p>
-                        </> :
-                        <>
-                            <SyncOutlined/>
-                            <p style={{ display: 'inline', color: 'gray' }}> 距上次自动更新 { refreshSecond } 秒 </p>
-                        </>
-                }
-            </Tooltip>
-        </div>
-    );
-
-    if (enableRefresh) {
-        useEffect(() => {
-            const secondTimer = setInterval(() => setRefreshSecond(timer => timer + 1), 1000);
-            const timer = setInterval(refresh, REFRESH_INTERVAL);
-
-            // clear timers when this component unmount.
-            return () => {
-                clearInterval(secondTimer);
-                clearInterval(timer);
-            }
-        }, []);
-    }
+    refreshSubject.subscribe(refreshAsync);
 
     return (
         <MenuLayout>
@@ -97,7 +69,7 @@ const ModelPage = ({
                 />
 
                 <div style={{ float: 'right', display: 'flex', alignItems: 'center' }}>
-                    { enableRefresh ? refresher: '' }
+                    { refreshEnabled ? <RefreshTimer refreshAsync={refreshAsync} />: '' }
 
                     <Button
                         type="primary"
@@ -128,7 +100,6 @@ const ModelPage = ({
                     console.log(x);
                     return x.name.toLowerCase().includes(searchName.toLowerCase())
                 })}
-                onChange={handleChange}
                 pagination={{
                     showSizeChanger: true,
                     showQuickJumper: true,
