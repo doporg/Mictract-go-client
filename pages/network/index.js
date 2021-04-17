@@ -71,7 +71,6 @@ const NetworkPage = () => {
         dataIndex: 'actions',
         title: '操作',
         render: (_, { id: networkID }) => {
-            // TODO: link to `/monitor/[id]`
             return (
                 <Button.Group key={networkID}>
                     <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>

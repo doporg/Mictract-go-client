@@ -5,6 +5,12 @@ const api = {
   listNetworks: () =>
       Api('GET', `/api/network`).done(),
 
+  // TODO: need implement
+  getNetworks: (networkID) =>
+      Api('GET', `/api/network`)
+          .query(networkID)
+          .done(),
+
   createNetwork: (network) =>
       Api('POST', `/api/network`)
           .body(network)
@@ -30,6 +36,12 @@ const api = {
           .body(userID)
           .done(),
 
+  // TODO: need implement
+  listUsersByNetwork: (networkID) =>
+      Api('GET', `/api/user`)
+          .query(networkID)
+          .done(),
+
 
   // ==================== channel ====================
   listChannels: () =>
@@ -40,9 +52,10 @@ const api = {
           .body(channel)
           .done(),
 
-  listChannelsByNetwork: (networkUrl) =>
+  // TODO: need implement
+  listChannelsByNetwork: (networkID) =>
       Api('GET', `/api/channel`)
-          .query({networkUrl})
+          .query(networkID)
           .done(),
 
 
@@ -64,6 +77,12 @@ const api = {
   // ==================== chaincode ====================
   listChaincodes: () =>
       Api('GET', `/api/chaincode`).done(),
+
+  // TODO: need implement
+  listChaincodesByNetwork: (networkID) =>
+      Api('GET', `/api/chaincode`)
+          .query(networkID)
+          .done(),
 
   // TODO: handle the proxy error
   // [HPM] Error occurred while trying to proxy request /api/chaincode from localhost:3000 to http://k8s:32323/ (ECONNRESET) (https://nodejs.org/api/errors.html#errors_common_system_errors)I
