@@ -4,6 +4,8 @@ import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {channelColumns} from "api/model";
+import {Subject} from "rxjs";
 
 const ChannelPage = () => {
     // ========== add new channel ==========
@@ -45,94 +47,23 @@ const ChannelPage = () => {
     };
 
     // ========== presentation channel ==========
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const refreshAsync = async () => {
-        try {
-            const { data: { payload: channels } } = await api.listChannels();
-            setDataSource(channels);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing',
-            });
-        }
-    };
-
-    useEffect(() => {
-        refreshAsync();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
         await interactWithMessage(
             () => api.createChannel(channel),
             'create channel',
         )();
-        await refreshAsync();
+        refresh$.next();
     };
-
-    const columns = [
-        {
-            key: 'id',
-            dataIndex: 'id',
-            title: 'ID',
-            sorter: (a, b) => a.id - b.id,
-            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
-        },
-        {
-            key: 'nickname',
-            dataIndex: 'nickname',
-            title: '昵称',
-            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
-            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        // TODO: change name into id
-        {
-            key: 'organizations',
-            dataIndex: 'organizations',
-            title: '包含组织ID',
-            render: R.pipe(
-                R.map( id => <Tag key={id} color={'purple'}>{id}</Tag>),
-                R.splitEvery(5),
-                R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
-                R.flatten,
-            ),
-        },
-        {
-            key: 'networkID',
-            dataIndex: 'networkID',
-            title: '所属网络ID',
-            render: value => <Tag key={value} color={'green'}>{value}</Tag>
-        },
-        {
-            key: 'status',
-            dataIndex: 'status',
-            title: '状态',
-            render: R.pipe(
-                R.cond([
-                    [ R.equals('running'),  () => [ '运行中', 'success' ] ],
-                    [ R.equals('starting'), () => [ '创建中', 'processing' ] ],
-                    [ R.equals('stopped'),  () => [ '已停止', 'warning' ] ],
-                    [ R.equals('error'),    () => [ '已出错', 'error' ] ],
-                    [ R.T,                     () => [ '未知错', 'error' ] ],
-                ]),
-                ([ v, status ]) => {
-                    return <Tag color={status}><Badge status={status} text={v}/></Tag>;
-                },
-            )
-        },
-    ];
 
     return (
         <ModelPage
             drawerTitle={'新增通道'}
-            columns={columns}
-            dataSource={dataSource}
-            rowKey={ record => `${record.name}-${record.network}` }
-            setSortedInfo={setSortedInfo}
+            columns={channelColumns}
+            dataSourceAsync={api.listChannels}
 
-            enableRefresh
-            onRefreshAsync={refreshAsync}
-
+            refreshEnabled
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>

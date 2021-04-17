@@ -1,9 +1,11 @@
 import {Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
+import {organizationColumns} from "api/model";
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {Subject} from "rxjs";
 
 const OrganizationPage = () => {
     // ========== add new organization ==========
@@ -37,80 +39,23 @@ const OrganizationPage = () => {
     }
 
     // ========== presentation networks ==========
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refreshAsync = async () => {
-        try {
-            const { data: { payload: orgs } } = await api.listOrganizations();
-            setDataSource(orgs);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing',
-            });
-        }
-    };
-
-    useEffect(() => {
-        refreshAsync();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
         await interactWithMessage(
             () => api.createOrganization(organization),
             'create organization',
         )();
-        await refreshAsync();
+        refresh$.next();
     };
-
-    const columns = [
-        {
-            key: 'id',
-            dataIndex: 'id',
-            title: 'ID',
-            sorter: (a, b) => a.id - b.id,
-            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
-        },
-        {
-            key: 'nickname',
-            dataIndex: 'nickname',
-            title: '昵称',
-            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
-            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        // TODO: change url into id model
-        {
-            key: 'peers',
-            dataIndex: 'peers',
-            title: '包含节点',
-            render: R.pipe(
-                R.map( name => <Tag key={name} color={'purple'}>{name.split('.')[0]}</Tag>),
-                R.splitEvery(5),
-                R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
-                R.flatten,
-            ),
-        },
-        {
-            key: 'networkID',
-            dataIndex: 'networkID',
-            title: '所属网络ID',
-            render: value => <Tag key={value} color={'green'}>{value}</Tag>
-        },
-    ];
 
     return (
         <ModelPage
             drawerTitle={'新增组织'}
-            columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            columns={organizationColumns}
+            dataSourceAsync={api.listOrganizations}
 
-            enableRefresh
-            onRefreshAsync={refreshAsync}
-
+            refreshEnabled
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>

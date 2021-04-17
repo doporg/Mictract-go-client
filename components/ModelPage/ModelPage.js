@@ -1,9 +1,9 @@
 import MenuLayout, {handleErrorWithMessage} from "components/MenuLayout/MenuLayout";
-import {Button, Input, message, Table, Tooltip} from "antd";
+import {Button, Input, Table} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
-import {PlusOutlined, SyncOutlined} from "@ant-design/icons";
-import {interval, Observable, Subject} from "rxjs";
+import {PlusOutlined} from "@ant-design/icons";
+import {Subject} from "rxjs";
 import {debounceTime, throttleTime} from "rxjs/operators";
 import ModelDrawer from "../ModelDrawer/ModelDrawer";
 import RefreshTimer from "../RefreshTimer/RefreshTimer";

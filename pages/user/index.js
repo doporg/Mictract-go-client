@@ -4,6 +4,8 @@ import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {userColumns} from "../../api/model";
+import {Subject} from "rxjs";
 
 const UserPage = () => {
     // ========== add new user ==========
@@ -48,31 +50,27 @@ const UserPage = () => {
         }
     };
 
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refresh = async () => {
-        try {
-            const { data: { payload: users } } = await api.listUsers();
-            setDataSource(users);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing',
-            });
+    const columns = [...userColumns];
+    columns.push({
+        key: 'actions',
+        dataIndex: 'actions',
+        title: '操作',
+        render: (_, { id }) => {
+            return (
+                <Button.Group key={id}>
+                    <Button onClick={handleDeleteUser(id)}>删除</Button>
+                </Button.Group>
+            );
         }
-    };
+    })
 
-    useEffect(() => {
-        refresh();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
         await interactWithMessage(
             () => api.createUser(user),
             'create user',
         )();
-        await refresh();
+        refresh$.next();
     };
 
     const handleDeleteUser = userID => async () => {
@@ -80,75 +78,18 @@ const UserPage = () => {
             () => api.deleteUser({id: userID}),
             'delete user',
         )();
-        await refresh();
+        refresh$.next();
     }
 
-    const columns = [
-        {
-            key: 'id',
-            dataIndex: 'id',
-            title: 'ID',
-            sorter: (a, b) => a.id - b.id,
-            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
-        },
-        {
-            key: 'nickname',
-            dataIndex: 'nickname',
-            title: '昵称',
-            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
-            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        {
-            key: 'role',
-            dataIndex: 'role',
-            title: '角色',
-            filteredValue: filteredInfo?.role,
-            filters: [
-                { text: 'admin', value: 'admin' },
-                { text: 'user', value: 'user' },
-            ],
-            onFilter: (value, record) => record.role.includes(value),
-            render: value => {
-                if (value === 'admin')
-                    return <Tag color={'red'}>{value}</Tag>;
-                else
-                    return <Tag color={'blue'}>{value}</Tag>;
-            }
-        },
-        {
-            key: 'organizationID',
-            dataIndex: 'organizationID',
-            title: '所属组织ID',
-            render: value => <Tag color={'geekblue'}>{value}</Tag>
-        },
-        {
-            key: 'networkID',
-            dataIndex: 'networkID',
-            title: '所属网络ID',
-            render: value => <Tag color={'green'}>{value}</Tag>
-        },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { id }) => {
-                return (
-                    <Button.Group key={id}>
-                        <Button onClick={handleDeleteUser(id)}>删除</Button>
-                    </Button.Group>
-                );
-            }
-        }
-    ];
 
+    // TODO: change dataSource into dataSourceAsync, refreshEnable, refreshSubject
     return (
         <ModelPage
             drawerTitle={'新增用户'}
             columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            dataSourceAsync={api.listUsers}
+
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>

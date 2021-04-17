@@ -1,13 +1,14 @@
 import {Badge, Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
+import {networkColumns, withInfos, withSortedInfo} from "api/model";
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
-import moment from 'moment';
 import * as R from 'ramda';
 import {useRouter} from "next/router";
 import ModelPage from "components/ModelPage/ModelPage";
 import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {Subject} from "rxjs";
 
 const NetworkPage = () => {
     // ========== add new network ==========
@@ -64,31 +65,29 @@ const NetworkPage = () => {
 
     // ========== presentation networks ==========
     const router = useRouter();
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refreshAsync = async () => {
-        try {
-            const { data: {payload: networks} } = await api.listNetworks();
-            setDataSource(networks);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing'
-            });
+    const columns = [...networkColumns];
+    columns.push({
+        key: 'actions',
+        dataIndex: 'actions',
+        title: '操作',
+        render: (_, { id: networkID }) => {
+            // TODO: link to `/monitor/[id]`
+            return (
+                <Button.Group key={networkID}>
+                    <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>
+                    <Button onClick={handleDeleteNetwork(networkID)}>删除</Button>
+                </Button.Group>
+            );
         }
-    };
+    });
 
-    useEffect(() => {
-        refreshAsync();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
         await interactWithMessage(
             () => api.createNetwork(network),
             'create network',
         )();
-        await refreshAsync();
+        refresh$.next();
     };
 
     const handleDeleteNetwork = networkID => async () => {
@@ -96,120 +95,17 @@ const NetworkPage = () => {
             () => api.deleteNetwork({ id: networkID }),
             'delete network',
         )();
-        await refreshAsync();
+        refresh$.next();
     }
-
-    const columns = [
-        {
-            key: 'id',
-            dataIndex: 'id',
-            title: 'ID',
-            sorter: (a, b) => a.id - b.id,
-            sortOrder: sortedInfo.columnKey === 'id' && sortedInfo.order,
-        },
-        {
-            key: 'nickname',
-            dataIndex: 'nickname',
-            title: '昵称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        {
-            key: 'consensus',
-            dataIndex: 'consensus',
-            title: '共识算法',
-            filteredValue: filteredInfo?.consensus,
-            filters: [
-                { text: 'solo', value: 'solo' },
-                { text: 'etcdRaft', value: 'etcdRaft' },
-            ],
-            onFilter: (value, record) => record.consensus.includes(value),
-        },
-        {
-            key: 'tlsEnabled',
-            dataIndex: 'tlsEnabled',
-            title: '开启TLS',
-            render: value => value ? '是' : '否',
-        },
-        {
-            key: 'orderers',
-            dataIndex: 'orderers',
-            title: '排序节点ID',
-            render: value => {
-                const compute = R.pipe(
-                    R.map(({ id: ordererID }) => <Tag color='cyan' key={ordererID}> { ordererID } </Tag>),
-                    R.splitEvery(3),
-                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
-                    R.flatten()
-                );
-                return <div> { compute(value) } </div>;
-            },
-        },
-        {
-            key: 'organizations',
-            dataIndex: 'organizations',
-            title: '组织ID',
-            render: value => {
-                const compute = R.pipe(
-                    R.map(({ id: organizationID }) => <Tag color='geekblue' key={organizationID}> { organizationID } </Tag>),
-                    R.splitEvery(5),
-                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
-                    R.flatten()
-                );
-                return <div> { compute(value) } </div>;
-            },
-        },
-        {
-            key: 'createTime',
-            dataIndex: 'createTime',
-            title: '创建时间',
-            render: value => moment.unix(value).format('YYYY-MM-DD'),
-        },
-        {
-            key: 'status',
-            dataIndex: 'status',
-            title: '状态',
-            render: R.pipe(
-                R.cond([
-                    [ R.equals('running'),  () => [ '运行中', 'success' ] ],
-                    [ R.equals('starting'), () => [ '创建中', 'processing' ] ],
-                    [ R.equals('stopped'),  () => [ '已停止', 'warning' ] ],
-                    [ R.equals('error'),    () => [ '已出错', 'error' ] ],
-                    [ R.T,                    () => [ '未知错', 'error' ] ],
-                ]),
-                ([ v, status ]) => {
-                    return <Tag color={status}><Badge status={status} text={v}/></Tag>;
-                },
-            )
-        },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { id: networkID }) => {
-                // TODO: link to `/monitor/[id]`
-                return (
-                    <Button.Group key={networkID}>
-                        <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>
-                        <Button onClick={handleDeleteNetwork(networkID)}>删除</Button>
-                    </Button.Group>
-                );
-            }
-        }
-    ];
 
     return (
         <ModelPage
             drawerTitle={'新增网络'}
             columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            dataSourceAsync={api.listNetworks}
 
-            enableRefresh
-            onRefreshAsync={refreshAsync}
-
+            refreshEnabled
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
