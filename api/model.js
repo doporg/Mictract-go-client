@@ -1,5 +1,5 @@
 import * as R from "ramda";
-import {Badge, Button, Tag} from "antd";
+import {Badge, Tag} from "antd";
 import moment from "moment";
 
 export const networkColumns = [
@@ -111,13 +111,12 @@ export const organizationColumns = [
         title: '昵称',
         sorter: (a, b) => a.nickname.localeCompare(b.nickname),
     },
-    // TODO: change url into id model
     {
         key: 'peers',
         dataIndex: 'peers',
         title: '包含节点',
         render: R.pipe(
-            R.map( name => <Tag key={name} color={'purple'}>{name.split('.')[0]}</Tag>),
+            R.map(({ id }) => <Tag key={id} color={'purple'}>{id}</Tag>),
             R.splitEvery(5),
             R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
             R.flatten,
@@ -199,13 +198,12 @@ export const channelColumns = [
         title: '昵称',
         sorter: (a, b) => a.nickname.localeCompare(b.nickname),
     },
-    // TODO: change name into id
     {
         key: 'organizations',
         dataIndex: 'organizations',
         title: '包含组织ID',
         render: R.pipe(
-            R.map( id => <Tag key={id} color={'purple'}>{id}</Tag>),
+            R.map(({ id }) => <Tag key={id} color={'purple'}>{id}</Tag>),
             R.splitEvery(5),
             R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
             R.flatten,
