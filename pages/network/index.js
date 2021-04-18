@@ -1,7 +1,7 @@
-import {Badge, Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
-import {useEffect, useState} from 'react';
+import {Button, Col, Form, Input, InputNumber, Row, Select, Switch} from "antd";
+import {useState} from 'react';
 import api from 'api';
-import {networkColumns, withInfos, withSortedInfo} from "api/model";
+import {modelColumns} from "api/model";
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import * as R from 'ramda';
 import {useRouter} from "next/router";
@@ -65,7 +65,7 @@ const NetworkPage = () => {
 
     // ========== presentation networks ==========
     const router = useRouter();
-    const columns = [...networkColumns];
+    const columns = [...modelColumns.network];
     columns.push({
         key: 'actions',
         dataIndex: 'actions',
@@ -74,7 +74,7 @@ const NetworkPage = () => {
             return (
                 <Button.Group key={networkID}>
                     <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>
-                    <Button onClick={handleDeleteNetwork(networkID)}>删除</Button>
+                    <Button onClick={handleDeleteNetwork(networkID)} danger>删除</Button>
                 </Button.Group>
             );
         }

@@ -3,7 +3,7 @@ import {Badge, Card, Col, Descriptions, PageHeader, Row, Statistic, Tabs, Tag} f
 import MenuLayout, {refreshDataSource} from "components/MenuLayout/MenuLayout";
 import {useEffect, useState} from "react";
 import NetworkDetailTable from "components/Network/NetworkDetailTable/NetworkDetailTable";
-import {chaincodeColumns, channelColumns, organizationColumns, userColumns} from "api/model";
+import {modelColumns} from "api/model";
 import api from "api";
 import * as R from "ramda";
 import moment from "moment";
@@ -73,7 +73,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"用户详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={userColumns}
+                        columns={columns.user}
                         dataSourceAsync={async () => api.listUsersByNetwork({ networkID })}
                         initialDataSource={network.users}
                     />
@@ -83,7 +83,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"组织详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={organizationColumns}
+                        columns={columns.organization}
                         dataSourceAsync={async () => api.listOrganizationsByNetwork({ networkID })}
                         initialDataSource={network.organizations}
                     />
@@ -93,7 +93,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"通道详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={channelColumns}
+                        columns={columns.channel}
                         dataSourceAsync={async () => api.listChannelsByNetwork({ networkID })}
                         initialDataSource={network.channels}
                     />
@@ -103,7 +103,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"链码详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={chaincodeColumns}
+                        columns={modelColumns.chaincode}
                         dataSourceAsync={async () => api.listChaincodesByNetwork({ networkID })}
                     />
                 </Card>

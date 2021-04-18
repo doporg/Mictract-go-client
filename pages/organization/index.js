@@ -1,7 +1,7 @@
-import {Button, Col, Form, Input, InputNumber, message, Row, Select, Slider, Tag} from "antd";
+import {Col, Form, Input, InputNumber, Row, Select, Slider} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
-import {organizationColumns} from "api/model";
+import {modelColumns} from "api/model";
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
@@ -51,7 +51,7 @@ const OrganizationPage = () => {
     return (
         <ModelPage
             drawerTitle={'新增组织'}
-            columns={organizationColumns}
+            columns={modelColumns.organization}
             dataSourceAsync={api.listOrganizations}
 
             refreshEnabled

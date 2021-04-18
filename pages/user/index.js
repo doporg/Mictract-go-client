@@ -1,10 +1,10 @@
-import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
+import {Button, Col, Form, Input, Row, Select} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
-import {userColumns} from "../../api/model";
+import {modelColumns} from "../../api/model";
 import {Subject} from "rxjs";
 
 const UserPage = () => {
@@ -50,7 +50,7 @@ const UserPage = () => {
         }
     };
 
-    const columns = [...userColumns];
+    const columns = [...modelColumns.user];
     columns.push({
         key: 'actions',
         dataIndex: 'actions',
@@ -58,7 +58,7 @@ const UserPage = () => {
         render: (_, { id }) => {
             return (
                 <Button.Group key={id}>
-                    <Button onClick={handleDeleteUser(id)}>删除</Button>
+                    <Button onClick={handleDeleteUser(id)} danger>删除</Button>
                 </Button.Group>
             );
         }

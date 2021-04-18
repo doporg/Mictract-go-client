@@ -4,7 +4,7 @@ import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
-import {channelColumns} from "api/model";
+import {modelColumns} from "api/model";
 import {Subject} from "rxjs";
 
 const ChannelPage = () => {
@@ -59,7 +59,7 @@ const ChannelPage = () => {
     return (
         <ModelPage
             drawerTitle={'新增通道'}
-            columns={channelColumns}
+            columns={modelColumns.channel}
             dataSourceAsync={api.listChannels}
 
             refreshEnabled

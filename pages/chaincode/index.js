@@ -5,8 +5,9 @@ import {CheckOutlined, CloseOutlined, UploadOutlined} from "@ant-design/icons";
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
 import {handleErrorWithMessage, interactWithMessage, refreshDataSource} from "components/MenuLayout/MenuLayout";
-import {chaincodeColumns} from "../../api/model";
+import {modelColumns, models} from "api/model";
 import {Subject} from "rxjs";
+import ModelDetailModal from "../../components/ModelDetailModal/ModelDetailModal";
 
 const ChaincodePage = () => {
     // ========== add new chaincode ==========
@@ -79,21 +80,31 @@ const ChaincodePage = () => {
         refresh$.next();
     };
 
-    const columns = [...chaincodeColumns];
+    const [ modalVisible, setModalVisible ] = useState(false);
+    const [ modalRecord, setModalRecord ] = useState({});
+    const handleShowDetailModal = record => {
+        setModalVisible(true);
+        setModalRecord(record);
+    };
+
+    const columns = [...modelColumns.chaincode];
     columns.push({
         key: 'actions',
         dataIndex: 'actions',
         title: '操作',
-        render: (_, { id, channelID, status }) => {
+        render: (_, record) => {
+            const { id, channelID, status } = record;
             if (status !== 'running')
                 return (
                     <Button.Group key={id}>
+                        <Button onClick={() => handleShowDetailModal(record)}>更多</Button>
                         <Button disabled onClick={showInvokeModal(id, channelID)}>调用</Button>
                     </Button.Group>
                 );
 
             return (
                 <Button.Group key={id}>
+                    <Button onClick={() => handleShowDetailModal(record)}>更多</Button>
                     <Button onClick={showInvokeModal(id, channelID)}>调用</Button>
                 </Button.Group>
             );
@@ -253,6 +264,13 @@ const ChaincodePage = () => {
                     </Form.Item>
                 </Form>
             </Modal>
+
+            <ModelDetailModal
+                model={models.chaincode}
+                visible={modalVisible}
+                record={modalRecord}
+                onCancel={() => setModalVisible(false)}
+            />
         </>
     );
 };
