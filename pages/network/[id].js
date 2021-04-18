@@ -1,12 +1,13 @@
 import {useRouter} from "next/router";
-import {Badge, Button, Card, Col, Descriptions, PageHeader, Row, Statistic, Tabs, Tag, Typography} from "antd";
-import MenuLayout from "components/MenuLayout/MenuLayout";
+import {Badge, Card, Col, Descriptions, PageHeader, Row, Statistic, Tabs, Tag} from "antd";
+import MenuLayout, {refreshDataSource} from "components/MenuLayout/MenuLayout";
 import {useEffect, useState} from "react";
 import NetworkDetailTable from "components/Network/NetworkDetailTable/NetworkDetailTable";
 import {chaincodeColumns, channelColumns, organizationColumns, userColumns} from "api/model";
 import api from "api";
 import * as R from "ramda";
 import moment from "moment";
+import ComponentLoader from "components/ComponentLoader/ComponentLoader";
 
 const { TabPane } = Tabs;
 
@@ -15,13 +16,11 @@ const NetworkDetailPage = () => {
     const { id: networkID } = router.query;
 
     const [ network, setNetwork ] = useState({});
+    const networkIsLoading = Object.keys(network).length === 0;
     useEffect(() => {
-        (async () => {
-            // const { data: { payload: network } } = api.getNetwork(id);
-            // setNetwork(network);
-            setNetwork(demoNetwork);
-        })();
-    }, []);
+        if (networkID)
+            refreshDataSource(() => api.getNetwork({id: networkID}), setNetwork);
+    }, [ networkID ]);
 
     const renderStatusTag = R.pipe(
         R.cond([
@@ -37,13 +36,13 @@ const NetworkDetailPage = () => {
     );
 
     const createTime = moment.unix(network?.createTime);
-    const networkDetailInfo = (
+    const renderNetworkDetailInfo = () => (
         <Row>
             <Col span={18}>
                 <Descriptions>
-                    <Descriptions.Item label={'名称'}>   {network?.name}</Descriptions.Item>
+                    <Descriptions.Item label={'名称'}>   {network?.nickname}</Descriptions.Item>
                     <Descriptions.Item label={'共识协议'}>{network?.consensus}</Descriptions.Item>
-                    <Descriptions.Item label={'开启TLS'}>{network?.tlsEnabled}</Descriptions.Item>
+                    <Descriptions.Item label={'开启TLS'}>{network?.tlsEnabled ? '是': '否'}</Descriptions.Item>
                     <Descriptions.Item label={'创建时间'}>{createTime.format('YYYY-MM-DD')}</Descriptions.Item>
                     <Descriptions.Item label={'排序节点'}>{network?.orderers?.length}</Descriptions.Item>
                     <Descriptions.Item label={'组织数目'}>{network?.organizations?.length}</Descriptions.Item>
@@ -69,13 +68,14 @@ const NetworkDetailPage = () => {
         </Row>
     );
 
-    const DetailTab = (
+    const renderDetailTab = () =>  (
         <Row gutter={[24, 18]} style={{ marginTop: '32px' }}>
             <Col span={24}>
                 <Card title={"用户详情"} type={'inner'}>
                     <NetworkDetailTable
                         columns={userColumns}
                         dataSourceAsync={async () => api.listUsersByNetwork({ networkID })}
+                        initialDataSource={network.users}
                     />
                 </Card>
             </Col>
@@ -85,6 +85,7 @@ const NetworkDetailPage = () => {
                     <NetworkDetailTable
                         columns={organizationColumns}
                         dataSourceAsync={async () => api.listOrganizationsByNetwork({ networkID })}
+                        initialDataSource={network.organizations}
                     />
                 </Card>
             </Col>
@@ -94,6 +95,7 @@ const NetworkDetailPage = () => {
                     <NetworkDetailTable
                         columns={channelColumns}
                         dataSourceAsync={async () => api.listChannelsByNetwork({ networkID })}
+                        initialDataSource={network.channels}
                     />
                 </Card>
             </Col>
@@ -111,22 +113,24 @@ const NetworkDetailPage = () => {
 
     return (
         <MenuLayout>
-            <PageHeader
-                onBack={() => window.history.back()}
-                title="网络详情"
-                subTitle={`ID: ${networkID}`}
-                tags={[
-                    renderStatusTag(network.status),
-                ]}
-                footer={
-                    <Tabs defaultActiveKey="1">
-                        <TabPane tab="详细信息" key="1"> {DetailTab} </TabPane>
-                        <TabPane tab="监控信息" key="2" />
-                    </Tabs>
-                }
-            >
-                { networkDetailInfo }
-            </PageHeader>
+            <ComponentLoader isLoading={ networkIsLoading }>
+                <PageHeader
+                    onBack={() => window.history.back()}
+                    title="网络详情"
+                    subTitle={`ID: ${networkID}`}
+                    tags={[
+                        renderStatusTag(network.status),
+                    ]}
+                    footer={
+                        <Tabs defaultActiveKey="1">
+                            <TabPane tab="详细信息" key="1"> { networkIsLoading? '': renderDetailTab() } </TabPane>
+                            <TabPane tab="监控信息" key="2" />
+                        </Tabs>
+                    }
+                >
+                    { renderNetworkDetailInfo() }
+                </PageHeader>
+            </ComponentLoader>
         </MenuLayout>
     );
 };

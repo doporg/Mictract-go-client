@@ -1,27 +1,22 @@
 import {Table} from "antd";
 import {useEffect, useState} from "react";
-import {handleErrorWithMessage} from "../../MenuLayout/MenuLayout";
-import {Subject} from "rxjs";
+import {refreshDataSource} from "../../MenuLayout/MenuLayout";
 
-const NetworkDetailTable = ({ columns, dataSourceAsync }) => {
+const NetworkDetailTable = ({ columns, dataSourceAsync, initialDataSource }) => {
     const [ tableLoading, setTableLoading ] = useState(true);
     const [ dataSource, setDataSource ] = useState([]);
 
-    const refreshAsync = async () => {
-        try {
-            const { data: {payload: dataSource} } = await dataSourceAsync();
-            setDataSource(dataSource);
+    const refreshAsync = async () =>
+        refreshDataSource(dataSourceAsync, setDataSource)
+            .then(() => setTableLoading(false));
 
-            if (tableLoading)
-                setTableLoading(false);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing',
-            });
-        }
-    };
     useEffect(() => {
-        refreshAsync()
+        if (initialDataSource) {
+            setDataSource(initialDataSource);
+            setTableLoading(false);
+        } else {
+            refreshAsync();
+        }
     }, []);
 
     return (

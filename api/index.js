@@ -5,10 +5,8 @@ const api = {
   listNetworks: () =>
       Api('GET', `/api/network`).done(),
 
-  // TODO: need implement
-  getNetworks: (networkID) =>
-      Api('GET', `/api/network`)
-          .query(networkID)
+  getNetwork: ({id}) =>
+      Api('GET', `/api/network/${id}`)
           .done(),
 
   createNetwork: (network) =>
@@ -44,6 +42,11 @@ const api = {
 
 
   // ==================== channel ====================
+  // TODO: need implement
+  getChannel: (id) =>
+      Api('GET', `/api/channel/${id}`)
+          .done(),
+
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
@@ -91,8 +94,9 @@ const api = {
           .body(chaincode)
           .done(),
 
-  invokeChaincode: (id) =>
-      Api('POST', `/api/chaincode/${id}`)
+  invokeChaincode: (invokeReq) =>
+      Api('POST', `/api/chaincode/invoke`)
+          .body(invokeReq)
           .done(),
 
 

@@ -11,6 +11,17 @@ import style from './MenuLayout.less';
 import Head from "next/head";
 import moment from "moment";
 
+export const refreshDataSource = async (dataSourceAsync, setDataSource) => {
+    try {
+        const { data: { payload: dataSource } } = await dataSourceAsync();
+        setDataSource(dataSource);
+    } catch (e) {
+        handleErrorWithMessage(e, {
+            message: 'refreshing',
+        });
+    }
+};
+
 export const handleErrorWithMessage = (error, option = {
     message: '',
     key: undefined
