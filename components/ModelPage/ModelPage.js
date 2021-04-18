@@ -1,4 +1,4 @@
-import MenuLayout, {handleErrorWithMessage} from "components/MenuLayout/MenuLayout";
+import MenuLayout, {handleErrorWithMessage, refreshDataSource} from "components/MenuLayout/MenuLayout";
 import {Button, Input, Table} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
@@ -15,8 +15,9 @@ const
     DEBOUNCE_TIME = 100;
 
 const ModelPage = ({
-                       drawerTitle,
-                       columns, dataSourceAsync, rowKey = 'id',
+                       drawerTitle, extra,
+                       columns, dataSourceAsync, initialDataSource,
+                       rowKey = 'id', rowSelection,
                        refreshEnabled, refreshSubject,
                        handleSubmit,
                        children }) => {
@@ -42,21 +43,19 @@ const ModelPage = ({
         });
 
     const [ dataSource, setDataSource ] = useState([]);
-    const refreshAsync = async () => {
-        try {
-            const { data: {payload: dataSource} } = await dataSourceAsync();
-            setDataSource(dataSource);
-        } catch (e) {
-            handleErrorWithMessage(e, {
-                message: 'refreshing',
-            });
-        }
-    };
+    const refreshAsync = () => refreshDataSource(dataSourceAsync, setDataSource);
     useEffect(() => {
-        refreshAsync()
+        if (initialDataSource !== undefined) {
+            setDataSource(initialDataSource);
+        } else {
+            refreshAsync();
+        }
     }, []);
 
     refreshSubject.subscribe(refreshAsync);
+
+    const drawerEnabled = drawerTitle !== undefined;
+    const extraEnabled = extra !== undefined;
 
     return (
         <MenuLayout>
@@ -71,12 +70,17 @@ const ModelPage = ({
                 <div style={{ float: 'right', display: 'flex', alignItems: 'center' }}>
                     { refreshEnabled ? <RefreshTimer refreshAsync={refreshAsync} />: '' }
 
-                    <Button
-                        type="primary"
-                        onClick={() => setDrawerVisible(true)}
-                    >
-                        <PlusOutlined /> { drawerTitle }
-                    </Button>
+                    {
+                        drawerEnabled ?
+                            <Button
+                                type="primary"
+                                onClick={() => setDrawerVisible(true)}
+                            >
+                                <PlusOutlined/> {drawerTitle}
+                            </Button> : ''
+                    }
+
+                    { extraEnabled ? extra : '' }
                 </div>
             </div>
 
@@ -93,12 +97,14 @@ const ModelPage = ({
                 className={globalStyle.contentMargin}
                 loading={tableLoading}
                 rowKey={rowKey}
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={dataSource.filter(x => {
                     if (x.nickname !== undefined)
                         return x.nickname.toLowerCase().includes(searchName.toLowerCase())
-                    console.log(x);
-                    return x.name.toLowerCase().includes(searchName.toLowerCase())
+                    if (x.name !== undefined)
+                        return x.name.toLowerCase().includes(searchName.toLowerCase())
+                    return x.id.toString().includes(searchName.toLowerCase())
                 })}
                 pagination={{
                     showSizeChanger: true,
