@@ -34,7 +34,6 @@ const api = {
           .body(userID)
           .done(),
 
-  // TODO: need implement
   listUsersByNetwork: (networkID) =>
       Api('GET', `/api/user`)
           .query(networkID)
@@ -43,7 +42,7 @@ const api = {
 
   // ==================== channel ====================
   // TODO: need implement
-  getChannel: (id) =>
+  getChannel: ({id}) =>
       Api('GET', `/api/channel/${id}`)
           .done(),
 
@@ -55,7 +54,6 @@ const api = {
           .body(channel)
           .done(),
 
-  // TODO: need implement
   listChannelsByNetwork: (networkID) =>
       Api('GET', `/api/channel`)
           .query(networkID)
@@ -81,7 +79,6 @@ const api = {
   listChaincodes: () =>
       Api('GET', `/api/chaincode`).done(),
 
-  // TODO: need implement
   listChaincodesByNetwork: (networkID) =>
       Api('GET', `/api/chaincode`)
           .query(networkID)
@@ -95,7 +92,7 @@ const api = {
           .done(),
 
   invokeChaincode: (invokeReq) =>
-      Api('POST', `/api/chaincode/invoke`)
+      Api('POST', `/api/chaincode/transaction`)
           .body(invokeReq)
           .done(),
 
