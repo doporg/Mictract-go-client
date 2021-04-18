@@ -18,6 +18,7 @@ const rawMenus = [
 
     { key: 'chaincode', title: '链码管理', icon: <ApartmentOutlined /> },
     { key: 'chaincode-list', parentKey: "chaincode", title: '链码列表', path: '/chaincode' },
+    { key: 'chaincode-transction-list', parentKey: "chaincode", title: '链码交易', path: '/chaincode/transaction' },
 ];
 
 const getMenusWithChildren = (rawMenus) => {

@@ -41,7 +41,6 @@ const api = {
 
 
   // ==================== channel ====================
-  // TODO: need implement
   getChannel: ({id}) =>
       Api('GET', `/api/channel/${id}`)
           .done(),
@@ -94,6 +93,19 @@ const api = {
   invokeChaincode: (invokeReq) =>
       Api('POST', `/api/chaincode/transaction`)
           .body(invokeReq)
+          .done(),
+
+  listChaincodeTransactions: () =>
+      Api('GET', `/api/chaincode/transaction`)
+          .done(),
+
+  getChaincodeTransaction: ({id}) =>
+      Api('GET', `/api/chaincode/transaction/${id}`)
+          .done(),
+
+  deleteChaincodeTransaction: (ids) =>
+      Api('DELETE', `/api/chaincode/transaction/`)
+          .body(ids)
           .done(),
 
 

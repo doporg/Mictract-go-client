@@ -329,3 +329,92 @@ export const chaincodeColumns = [
     //     }
     // }
 ];
+
+export const chaincodeTransactionColumns = [
+    {
+        key: 'id',
+        dataIndex: 'id',
+        title: 'ID',
+        sorter: (a, b) => a.id - b.id,
+    },
+    // TODO: too long to show those fields below
+    // {
+    //     key: 'txID',
+    //     dataIndex: 'txID',
+    //     title: '交易ID',
+    //     sorter: (a, b) => a.txID - b.txID,
+    // },
+    {
+        key: 'invokeType',
+        dataIndex: 'invokeType',
+        title: '调用类型',
+        filters: [
+            { text: 'init', value: 'init' },
+            { text: 'query', value: 'query' },
+            { text: 'execute', value: 'execute' },
+        ],
+        onFilter: (value, record) => record.invokeType.includes(value),
+        render: value => <Tag color={'blue'}>{value}</Tag>
+    },
+    {
+        key: 'args',
+        dataIndex: 'args',
+        title: '参数',
+        render: value => {
+            const compute = R.pipe(
+                R.map(arg => <Tag color='red' key={arg}> { arg } </Tag>),
+                R.splitEvery(5),
+                R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
+                R.flatten()
+            );
+            return <div> { compute(value) } </div>;
+        },
+    },
+    // {
+    //     key: 'message',
+    //     dataIndex: 'message',
+    //     title: '消息',
+    // },
+    {
+        key: 'userID',
+        dataIndex: 'userID',
+        title: '用户ID',
+        render: value => <Tag key={value} color={'purple'}>{value}</Tag>
+    },
+    {
+        key: 'chaincodeID',
+        dataIndex: 'chaincodeID',
+        title: '所属链码ID',
+        render: value => <Tag key={value} color={'green'}>{value}</Tag>
+    },
+    {
+        key: 'peerURLs',
+        dataIndex: 'peerURLs',
+        title: 'Peer URL',
+        render: value => {
+            const compute = R.pipe(
+                R.map(url => <Tag color='cyan' key={url}> { url } </Tag>),
+                R.splitEvery(3),
+                R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
+                R.flatten()
+            );
+            return <div> { compute(value) } </div>;
+        },
+    },
+    {
+        key: 'status',
+        dataIndex: 'status',
+        title: '状态',
+        render: R.pipe(
+            R.cond([
+                [ R.equals('success'),  () => [ '已成功', 'success' ] ],
+                [ R.equals('execute'),  () => [ '执行中', 'processing' ] ],
+                [ R.equals('error'),    () => [ '已出错', 'error' ] ],
+                [ R.T,                  () => [ '未知错', 'error' ] ],
+            ]),
+            ([ v, status ]) => {
+                return <Tag color={status}><Badge status={status} text={v}/></Tag>;
+            },
+        )
+    },
+];
