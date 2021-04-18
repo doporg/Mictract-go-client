@@ -73,7 +73,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"用户详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={columns.user}
+                        columns={modelColumns.user}
                         dataSourceAsync={async () => api.listUsersByNetwork({ networkID })}
                         initialDataSource={network.users}
                     />
@@ -83,7 +83,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"组织详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={columns.organization}
+                        columns={modelColumns.organization}
                         dataSourceAsync={async () => api.listOrganizationsByNetwork({ networkID })}
                         initialDataSource={network.organizations}
                     />
@@ -93,7 +93,7 @@ const NetworkDetailPage = () => {
             <Col span={24}>
                 <Card title={"通道详情"} type={'inner'}>
                     <NetworkDetailTable
-                        columns={columns.channel}
+                        columns={modelColumns.channel}
                         dataSourceAsync={async () => api.listChannelsByNetwork({ networkID })}
                         initialDataSource={network.channels}
                     />
