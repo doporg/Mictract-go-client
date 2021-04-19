@@ -1,41 +1,61 @@
-import MenuLayout from "components/MenuLayout/MenuLayout";
-import {Button, Input, message, Table} from "antd";
+import MenuLayout, {handleErrorWithMessage, refreshDataSource} from "components/MenuLayout/MenuLayout";
+import {Button, Input, Table} from "antd";
 import { useEffect, useState } from 'react';
 import globalStyle from 'pages/index.less';
 import {PlusOutlined} from "@ant-design/icons";
 import {Subject} from "rxjs";
 import {debounceTime, throttleTime} from "rxjs/operators";
 import ModelDrawer from "../ModelDrawer/ModelDrawer";
+import RefreshTimer from "../RefreshTimer/RefreshTimer";
 
 const { Search } = Input;
 
-const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo, drawerTitle, handleSubmit, children }) => {
+const
+    THROTTLE_TIME = 1000,
+    DEBOUNCE_TIME = 100;
+
+const ModelPage = ({
+                       drawerTitle, extra,
+                       columns, dataSourceAsync, initialDataSource,
+                       rowKey = 'id', rowSelection,
+                       refreshEnabled, refreshSubject,
+                       handleSubmit,
+                       children }) => {
     const [ tableLoading, setTableLoading ] = useState(false);
     const [ drawerVisible, setDrawerVisible ] = useState(false);
-    const [ searchName, setSearchName ] = useState('');
 
-    const handleSearch = (value) => {
-        setSearchName(value);
+    const [ searchName, setSearchName ] = useState('');
+    const handleSearch = (searchName) => {
+        setSearchName(searchName);
         setTableLoading(false);
     };
 
     const searchInputChange$ = new Subject();
     searchInputChange$
         .pipe(
-            throttleTime(1000),
-            debounceTime(100),
-        ).subscribe(handleSearch)
+            throttleTime(THROTTLE_TIME),
+            debounceTime(DEBOUNCE_TIME),
+        ).subscribe(handleSearch);
+
     searchInputChange$
         .subscribe(() => {
             setTableLoading(true);
-        })
+        });
 
-    const handleChange = (pagination, filters, sorter) => {
-        if (setFilteredInfo)
-            setFilteredInfo(filters);
-        if (setSortedInfo)
-            setSortedInfo(sorter);
-    }
+    const [ dataSource, setDataSource ] = useState([]);
+    const refreshAsync = () => refreshDataSource(dataSourceAsync, setDataSource);
+    useEffect(() => {
+        if (initialDataSource !== undefined) {
+            setDataSource(initialDataSource);
+        } else {
+            refreshAsync();
+        }
+    }, []);
+
+    refreshSubject.subscribe(refreshAsync);
+
+    const drawerEnabled = drawerTitle !== undefined;
+    const extraEnabled = extra !== undefined;
 
     return (
         <MenuLayout>
@@ -47,13 +67,21 @@ const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo
                     style={{ maxWidth: '300px' }}
                 />
 
-                <Button
-                    type="primary"
-                    onClick={() => setDrawerVisible(true)}
-                    style={{ float: 'right' }}
-                >
-                    <PlusOutlined /> { drawerTitle }
-                </Button>
+                <div style={{ float: 'right', display: 'flex', alignItems: 'center' }}>
+                    { refreshEnabled ? <RefreshTimer refreshAsync={refreshAsync} />: '' }
+
+                    {
+                        drawerEnabled ?
+                            <Button
+                                type="primary"
+                                onClick={() => setDrawerVisible(true)}
+                            >
+                                <PlusOutlined/> {drawerTitle}
+                            </Button> : ''
+                    }
+
+                    { extraEnabled ? extra : '' }
+                </div>
             </div>
 
             <ModelDrawer
@@ -69,9 +97,15 @@ const ModelPage = ({ columns, dataSource, rowKey, setSortedInfo, setFilteredInfo
                 className={globalStyle.contentMargin}
                 loading={tableLoading}
                 rowKey={rowKey}
+                rowSelection={rowSelection}
                 columns={columns}
-                dataSource={dataSource.filter(x => x.name.toLowerCase().includes(searchName.toLowerCase()))}
-                onChange={handleChange}
+                dataSource={dataSource.filter(x => {
+                    if (x.nickname !== undefined)
+                        return x.nickname.toLowerCase().includes(searchName.toLowerCase())
+                    if (x.name !== undefined)
+                        return x.name.toLowerCase().includes(searchName.toLowerCase())
+                    return x.id.toString().includes(searchName.toLowerCase())
+                })}
                 pagination={{
                     showSizeChanger: true,
                     showQuickJumper: true,

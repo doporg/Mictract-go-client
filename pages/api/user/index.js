@@ -29,7 +29,7 @@ export default (req, res) => {
             }
 
             res.status(200)
-                .json(users);
+                .json({payload: users});
             break;
 
         case 'POST':

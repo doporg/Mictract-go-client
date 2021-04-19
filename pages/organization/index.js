@@ -1,14 +1,17 @@
-import {Button, Col, Form, InputNumber, message, Row, Select, Slider, Tag} from "antd";
+import {Col, Form, Input, InputNumber, Row, Select, Slider} from "antd";
 import {useEffect, useState} from 'react';
 import api from 'api';
+import {modelColumns} from "api/model";
 import * as R from 'ramda';
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {Subject} from "rxjs";
 
 const OrganizationPage = () => {
     // ========== add new organization ==========
     const [ organization, setOrganization ] = useState({
-        networkUrl: '',
+        nickname: '',
+        networkID: '',
         peerCount: 2,
     });
 
@@ -18,9 +21,11 @@ const OrganizationPage = () => {
         (async () => {
             try {
                 const { data: { payload: networks } } = await api.listNetworks();
-                setNetworks(networks.map(R.prop('name')));
+                setNetworks(networks);
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })();
     }, []);
@@ -34,94 +39,42 @@ const OrganizationPage = () => {
     }
 
     // ========== presentation networks ==========
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refresh = async () => {
-        try {
-            const { data: { payload: orgs } } = await api.listOrganizations();
-            setDataSource(orgs);
-        } catch (e) {
-            message.error(e);
-        }
-    };
-
-    useEffect(() => {
-        refresh();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createOrganization(organization))();
-        await refresh();
+        await interactWithMessage(
+            () => api.createOrganization(organization),
+            'create organization',
+        )();
+        refresh$.next();
     };
-
-    // this feature has been removed
-    //
-    // const handleDeleteOrganization = organizationUrl => async () => {
-    //     await interactWithMessage(() => api.deleteOrganization(organizationUrl))();
-    //     await refresh();
-    // }
-
-    const columns = [
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
-        },
-        {
-            key: 'peers',
-            dataIndex: 'peers',
-            title: '包含节点',
-            render: R.pipe(
-                R.map( name => <Tag key={name} color={'purple'}>{name.split('.')[0]}</Tag>),
-                R.splitEvery(5),
-                R.addIndex(R.map)((arr, i) => R.append(<br key={i}/>)(arr)),
-                R.flatten,
-            ),
-        },
-        {
-            key: 'network',
-            dataIndex: 'network',
-            title: '所属网络',
-            render: value => <Tag key={value} color={'green'}>{value.split('.')[0]}</Tag>
-        },
-        // this feature has been removed
-        //
-        // {
-        //     key: 'actions',
-        //     dataIndex: 'actions',
-        //     title: '操作',
-        //     render: (_, { name }) => {
-        //         return (
-        //             <Button.Group>
-        //                 <Button onClick={handleDeleteOrganization(name)}>删除</Button>
-        //             </Button.Group>
-        //         );
-        //     }
-        // }
-    ];
 
     return (
         <ModelPage
             drawerTitle={'新增组织'}
-            columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            columns={modelColumns.organization}
+            dataSourceAsync={api.listOrganizations}
+
+            refreshEnabled
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
+                <Form.Item label={'昵称'} rules={{ require: true, message: '请填写昵称' }}>
+                    <Input
+                        placeholder={'请填写昵称'}
+                        onChange={(e) => setOrganizationByKey('nickname')(e.target.value)}
+                    />
+                </Form.Item>
+
                 <Form.Item label={'所属网络'} rules={{ require: true, message: '请填写所属网络' }}>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Select placeholder='请选择所属网络' onChange={setOrganizationByKey('networkUrl')} value={organization.networkUrl}>
+                            <Select placeholder='请选择所属网络' onChange={setOrganizationByKey('networkID')} value={organization.networkUrl}>
                                 {
                                     networks
-                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                        .map(({ id: networkID, nickname }) =>
+                                            <Select.Option key={networkID} value={networkID}>{`${networkID} - ${nickname}`}</Select.Option>
+                                        )
                                 }
                             </Select>
                         </Col>

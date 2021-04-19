@@ -1,19 +1,39 @@
-import {InputNumber, Table} from 'antd';
+import {Input, InputNumber, Table} from 'antd';
+import * as R from 'ramda';
 
-const PeerCountTable = ({ onChange, peerCounts }) => {
-    const peerCountsData = peerCounts.map((count, idx) => ({
+const PeerCountTable = ({
+                            onPeerCountChange, onOrganizationNicknameChange,
+                            peerCounts, organizationNicknames }) => {
+    const zippedData = R.zip(peerCounts, organizationNicknames);
+
+    const data = zippedData.map(([count, nickname], idx) => ({
         key: idx,
         name: `组织${idx+1}`,
         peerCount: count,
+        organizationNickname: nickname,
     }));
 
-    const onPeerCountChange = key => count => onChange(key, count);
+    const onPeerCountChangeWrapped = key => count => onPeerCountChange(key, count);
+    const onOrganizationNicknameChangeWrapped = key => nickname => onOrganizationNicknameChange(key, nickname);
 
     const columns = [
         {
             key: 'name',
             dataIndex: 'name',
             title: '名称',
+        },
+        {
+            key: 'organizationNickname',
+            dataIndex: 'organizationNickname',
+            title: '组织昵称',
+            render: (_, record) => {
+                return <Input
+                    min={1}
+                    max={10}
+                    value={record.organizationNickname}
+                    onChange={e => onOrganizationNicknameChangeWrapped(record.key)(e.target.value)}
+                />
+            }
         },
         {
             key: 'peerCount',
@@ -24,14 +44,14 @@ const PeerCountTable = ({ onChange, peerCounts }) => {
                     min={1}
                     max={10}
                     value={record.peerCount}
-                    onChange={onPeerCountChange(record.key)}
+                    onChange={onPeerCountChangeWrapped(record.key)}
                 />
             }
         },
     ];
 
     return (
-        <Table columns={columns} dataSource={peerCountsData} />
+        <Table columns={columns} dataSource={data} />
     );
 };
 

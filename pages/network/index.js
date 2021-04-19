@@ -1,21 +1,24 @@
-import {Badge, Button, Col, Form, InputNumber, message, Row, Select, Slider, Switch, Tag} from "antd";
-import {useEffect, useState} from 'react';
+import {Button, Col, Form, Input, InputNumber, Row, Select, Switch} from "antd";
+import {useState} from 'react';
 import api from 'api';
+import {modelColumns} from "api/model";
 import {CheckOutlined, CloseOutlined} from "@ant-design/icons";
-import moment from 'moment';
 import * as R from 'ramda';
 import {useRouter} from "next/router";
 import ModelPage from "components/ModelPage/ModelPage";
 import PeerCountTable from "components/Network/PeerCountTable/PeerCountTable";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {Subject} from "rxjs";
 
 const NetworkPage = () => {
     // ========== add new network ==========
     const [ network, setNetwork ] = useState({
+        nickname: '',
         consensus: 'solo',
         tlsEnabled: true,
         ordererCount: 1,
         peerCounts: [ 2, 2 ],
+        organizationNicknames: [ 'org1', 'org2' ],
     });
 
     const setNetworkByKey = (key) => {
@@ -27,13 +30,20 @@ const NetworkPage = () => {
 
     const setOrgCount = (count) => {
         const diff = count - network.peerCounts.length;
-        const compute = diff < 0 ?
+        const reduceOrExpand = fill => diff < 0 ?
             R.take(count) :
-            R.concat(R.__, R.repeat(2)(diff));
-        const peerCounts = compute(network.peerCounts)
+            R.concat(R.__, R.repeat(fill)(diff));
+
+        const peerCounts = reduceOrExpand(2)(network.peerCounts);
+        const organizationNicknames = reduceOrExpand('orgX')(network.organizationNicknames)
+            .map((nickname, idx) => {
+                if (nickname === 'orgX')
+                    return `org${idx+1}`;
+                return nickname;
+            });
 
         setNetwork( network =>
-            R.mergeRight(network, { peerCounts })
+            R.mergeRight(network, { peerCounts, organizationNicknames })
         )
     }
 
@@ -45,138 +55,66 @@ const NetworkPage = () => {
         })
     }
 
-    // ========== presentation networks ==========
-    const router = useRouter();
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refresh = async () => {
-        try {
-            const { data: {payload: networks} } = await api.listNetworks();
-            setDataSource(networks);
-        } catch (e) {
-            message.error(e.message);
-        }
-    };
-
-    useEffect(() => {
-        refresh();
-    }, []);
-
-    const handleSubmit = async () => {
-        await interactWithMessage(() => api.createNetwork(network))();
-        await refresh();
-    };
-
-    const handleDeleteNetwork = networkUrl => async () => {
-        await interactWithMessage(() => api.deleteNetwork(networkUrl))();
-        await refresh();
+    const setOrganizationNicknameByKey = (key, value) => {
+        setNetwork(network => {
+            // NOTE: here use shallow copy because diffing algo is based on the pointer address.
+            network.organizationNicknames[key] = value;
+            return { ...network };
+        })
     }
 
-    const columns = [
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
-        },
-        {
-            key: 'consensus',
-            dataIndex: 'consensus',
-            title: '共识算法',
-            filteredValue: filteredInfo?.consensus,
-            filters: [
-                { text: 'solo', value: 'solo' },
-                { text: 'etcdRaft', value: 'etcdRaft' },
-            ],
-            onFilter: (value, record) => record.consensus.includes(value),
-        },
-        {
-            key: 'tlsEnabled',
-            dataIndex: 'tlsEnabled',
-            title: '开启TLS',
-            render: value => value ? '是' : '否',
-        },
-        {
-            key: 'orderers',
-            dataIndex: 'orderers',
-            title: '排序节点',
-            render: value => {
-                const compute = R.pipe(
-                    R.map(v => <Tag color='cyan' key={v}> { v.split('.')[0] } </Tag>),
-                    R.splitEvery(3),
-                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
-                    R.flatten()
-                );
-                return <div> { compute(value) } </div>;
-            },
-        },
-        {
-            key: 'organizations',
-            dataIndex: 'organizations',
-            title: '组织',
-            render: value => {
-                const compute = R.pipe(
-                    R.map(({name: v}) => <Tag color='geekblue' key={v}> { v.split('.')[0] } </Tag>),
-                    R.splitEvery(5),
-                    R.addIndex(R.map)((row, i) => [ ...row, <br key={i}/> ]),
-                    R.flatten()
-                );
-                return <div> { compute(value) } </div>;
-            },
-        },
-        {
-            key: 'createTime',
-            dataIndex: 'createTime',
-            title: '创建时间',
-            render: value => moment.unix(value).format('YYYY-MM-DD'),
-        },
-        {
-            key: 'status',
-            dataIndex: 'status',
-            title: '状态',
-            render: R.pipe(
-                R.cond([
-                    [ R.equals('running'),  () => [ '运行中', 'success' ] ],
-                    [ R.equals('starting'), () => [ '创建中', 'processing' ] ],
-                    [ R.equals('stopped'),  () => [ '已停止', 'warning' ] ],
-                    [ R.equals('error'),    () => [ '已出错', 'error' ] ],
-                    [ R.T,                    () => [ '未知错', 'error' ] ],
-                ]),
-                ([ v, status ]) => {
-                    return <Tag color={status}><Badge status={status} text={v}/></Tag>;
-                },
-            )
-        },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { key, name }) => {
-                // TODO: link to `/monitor/[id]`
-                return (
-                    <Button.Group key={name}>
-                        <Button onClick={() => router.push(`/network/${key}`)}>查看</Button>
-                        <Button onClick={handleDeleteNetwork(name)}>删除</Button>
-                    </Button.Group>
-                );
-            }
+    // ========== presentation networks ==========
+    const router = useRouter();
+    const columns = [...modelColumns.network];
+    columns.push({
+        key: 'actions',
+        dataIndex: 'actions',
+        title: '操作',
+        render: (_, { id: networkID }) => {
+            return (
+                <Button.Group key={networkID}>
+                    <Button onClick={() => router.push(`/network/${networkID}`)}>查看</Button>
+                    <Button onClick={handleDeleteNetwork(networkID)} danger>删除</Button>
+                </Button.Group>
+            );
         }
-    ];
+    });
+
+    const refresh$ = new Subject();
+    const handleSubmit = async () => {
+        await interactWithMessage(
+            () => api.createNetwork(network),
+            'create network',
+        )();
+        refresh$.next();
+    };
+
+    const handleDeleteNetwork = networkID => async () => {
+        await interactWithMessage(
+            () => api.deleteNetwork({ id: networkID }),
+            'delete network',
+        )();
+        refresh$.next();
+    }
 
     return (
         <ModelPage
             drawerTitle={'新增网络'}
             columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            dataSourceAsync={api.listNetworks}
+
+            refreshEnabled
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
+                <Form.Item label={'昵称'} rules={{ require: true, message: '请填写昵称' }}>
+                    <Input
+                        placeholder={'请填写昵称'}
+                        onChange={(e) => setNetworkByKey('nickname')(e.target.value)}
+                    />
+                </Form.Item>
+
                 <Row gutter={16}>
                     <Col span={18}>
                         <Form.Item label={'共识协议'} rules={{ require: true, message: '请选择共识协议' }}>
@@ -201,29 +139,26 @@ const NetworkPage = () => {
             </Form>
 
             <Form layout={'vertical'}>
-                <Form.Item label={'排序节点个数'}>
-                    <Row gutter={16}>
-                        <Col span={6}>
+                <Row gutter={18}>
+                    <Col span={12}>
+                        <Form.Item label={'排序节点个数'}>
                             <InputNumber min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
-                        </Col>
-                        <Col span={18}>
-                            <Slider min={1} max={10} onChange={setNetworkByKey('ordererCount')} value={network.ordererCount} />
-                        </Col>
-                    </Row>
-                </Form.Item>
-
-                <Form.Item label={'组织个数'}>
-                    <Row gutter={16}>
-                        <Col span={6}>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={'组织个数'}>
                             <InputNumber min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
-                        </Col>
-                        <Col span={18}>
-                            <Slider min={1} max={20} onChange={setOrgCount} value={network.peerCounts.length} />
-                        </Col>
-                    </Row>
-                </Form.Item>
+                        </Form.Item>
+                    </Col>
+                </Row>
+
                 <Form.Item label={'节点个数'}>
-                    <PeerCountTable onChange={setPeerCountsByKey} peerCounts={network.peerCounts} />
+                    <PeerCountTable
+                        onPeerCountChange={setPeerCountsByKey}
+                        onOrganizationNicknameChange={setOrganizationNicknameByKey}
+                        peerCounts={network.peerCounts}
+                        organizationNicknames={network.organizationNicknames}
+                    />
                 </Form.Item>
             </Form>
         </ModelPage>

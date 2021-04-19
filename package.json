@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "gray-matter": "^4.0.2",
     "hover.css": "^2.3.2",
-    "http-proxy-middleware": "^1.0.6",
+    "http-proxy-middleware": "^1.1.2",
     "moment": "^2.29.1",
     "next": "9.5.3",
     "next-compose-plugins": "^2.2.0",

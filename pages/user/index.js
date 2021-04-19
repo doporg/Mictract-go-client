@@ -1,17 +1,18 @@
-import {Button, Col, Form, Input, message, Row, Select, Tag} from "antd";
+import {Button, Col, Form, Input, Row, Select} from "antd";
 import {useState, useEffect} from "react";
 import * as R from "ramda";
 import api from "api";
 import ModelPage from "components/ModelPage/ModelPage";
-import {interactWithMessage} from "pages/index";
+import {handleErrorWithMessage, interactWithMessage} from "components/MenuLayout/MenuLayout";
+import {modelColumns} from "../../api/model";
+import {Subject} from "rxjs";
 
 const UserPage = () => {
     // ========== add new user ==========
     const [ user, setUser ] = useState({
         nickname: '',
         role: 'user',
-        organization: undefined,
-        network: undefined,
+        organizationID: undefined,
         password: '',
     });
 
@@ -28,124 +29,65 @@ const UserPage = () => {
         (async () => {
             try {
                 const { data: { payload: networks } } = await api.listNetworks();
-                setNetworks( networks.map(R.prop('name')) )
+                setNetworks(networks);
             } catch (e) {
-                message.error(e);
+                handleErrorWithMessage(e, {
+                    message: 'list networks',
+                });
             }
         })()
     }, []);
 
-    const [ orgsInNetwork, setOrgsInNetwork ] = useState([]);
-    const onNetworkChange = async networkUrl => {
-        setUserByKey('network')(networkUrl);
-
+    const [ organizationsInNetwork, setOrganizationsInNetwork ] = useState([]);
+    const onNetworkChange = async networkID => {
         try {
-            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork(networkUrl);
-            setOrgsInNetwork(orgs);
+            const { data: { payload: orgs } } = await api.listOrganizationsByNetwork({networkID});
+            setOrganizationsInNetwork(orgs);
         } catch (e) {
-            message.error(e);
+            handleErrorWithMessage(e, {
+                message: 'list organizations by network',
+            });
         }
     };
 
-    const [ dataSource, setDataSource ] = useState([]);
-    const [ sortedInfo, setSortedInfo ] = useState({});
-    const [ filteredInfo, setFilteredInfo ] = useState({});
-
-    const refresh = async () => {
-        try {
-            const { data: { payload: users } } = await api.listUsers();
-            setDataSource(users);
-        } catch (e) {
-            message.error(e);
+    const columns = [...modelColumns.user];
+    columns.push({
+        key: 'actions',
+        dataIndex: 'actions',
+        title: '操作',
+        render: (_, { id }) => {
+            return (
+                <Button.Group key={id}>
+                    <Button onClick={handleDeleteUser(id)} danger>删除</Button>
+                </Button.Group>
+            );
         }
-    };
+    })
 
-    useEffect(() => {
-        refresh();
-    }, []);
-
+    const refresh$ = new Subject();
     const handleSubmit = async () => {
-        await interactWithMessage(() => api.createUser(user))();
-        await refresh();
+        await interactWithMessage(
+            () => api.createUser(user),
+            'create user',
+        )();
+        refresh$.next();
     };
 
-    const handleDeleteUser = userUrl => async () => {
-        await interactWithMessage(() => api.deleteUser(userUrl))();
-        await refresh();
+    const handleDeleteUser = userID => async () => {
+        await interactWithMessage(
+            () => api.deleteUser({id: userID}),
+            'delete user',
+        )();
+        refresh$.next();
     }
-
-    const columns = [
-        {
-            key: 'name',
-            dataIndex: 'name',
-            title: '名称 / URL',
-            sorter: (a, b) => a.name.localeCompare(b.name),
-            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
-        },
-        {
-            key: 'nickname',
-            dataIndex: 'nickname',
-            title: '昵称',
-            sorter: (a, b) => a.nickname.localeCompare(b.nickname),
-            sortOrder: sortedInfo.columnKey === 'nickname' && sortedInfo.order,
-        },
-        {
-            key: 'role',
-            dataIndex: 'role',
-            title: '角色',
-            filteredValue: filteredInfo?.role,
-            filters: [
-                { text: 'admin', value: 'admin' },
-                { text: 'user', value: 'user' },
-            ],
-            onFilter: (value, record) => record.role.includes(value),
-            render: value => {
-                if (value === 'admin')
-                    return <Tag color={'red'}>{value}</Tag>;
-                else
-                    return <Tag color={'blue'}>{value}</Tag>;
-            }
-        },
-        {
-            key: 'organization',
-            dataIndex: 'organization',
-            title: '所属组织',
-            render: value => {
-                const org = value.split('.')[0];
-                if (org === 'orderer')
-                    return <Tag color={'cyan'}>{org}</Tag>;
-                else
-                    return <Tag color={'geekblue'}>{org}</Tag>;
-            }
-        },
-        {
-            key: 'network',
-            dataIndex: 'network',
-            title: '所属网络',
-            render: value => <Tag color={'green'}>{value.split('.')[0]}</Tag>
-        },
-        {
-            key: 'actions',
-            dataIndex: 'actions',
-            title: '操作',
-            render: (_, { key }) => {
-                return (
-                    <Button.Group>
-                        <Button onClick={handleDeleteUser(key)}>删除</Button>
-                    </Button.Group>
-                );
-            }
-        }
-    ];
 
     return (
         <ModelPage
             drawerTitle={'新增用户'}
             columns={columns}
-            dataSource={dataSource}
-            rowKey={ R.prop('name') }
-            setSortedInfo={setSortedInfo}
-            setFilteredInfo={setFilteredInfo}
+            dataSourceAsync={api.listUsers}
+
+            refreshSubject={refresh$}
             handleSubmit={handleSubmit}
         >
             <Form layout={'vertical'}>
@@ -174,18 +116,20 @@ const UserPage = () => {
                             <Select placeholder='请选择所属网络' onChange={onNetworkChange} value={user.network}>
                                 {
                                     networks
-                                        .map(net => <Select.Option key={net} value={net}>{net}</Select.Option>)
+                                        .map(({ id: networkID, nickname }) =>
+                                            <Select.Option key={networkID} value={networkID}>{`${networkID} - ${nickname}`}</Select.Option>
+                                        )
                                 }
                             </Select>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label={'所属组织'} rules={{ require: true, message: '请填写所属组织' }}>
-                            <Select placeholder='请选择所属组织' onChange={setUserByKey('organization')} value={user.organization}>
+                            <Select placeholder='请选择所属组织' onChange={setUserByKey('organizationID')} value={user.organization}>
                                 {
-                                    orgsInNetwork
-                                        .map(({ name }) =>
-                                            <Select.Option key={name} value={name}>{name}</Select.Option>
+                                    organizationsInNetwork
+                                        .map(({ id: organizationID, nickname }) =>
+                                            <Select.Option key={organizationID} value={organizationID}>{`${organizationID} - ${nickname}`}</Select.Option>
                                         )
                                 }
                             </Select>

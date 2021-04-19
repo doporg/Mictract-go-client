@@ -5,23 +5,18 @@ const api = {
   listNetworks: () =>
       Api('GET', `/api/network`).done(),
 
-  // Example:
-  // {
-  //     consensus: 'solo',
-  //     tlsEnabled: true,
-  //     ordererCount: 1,
-  //     peerCounts: [ 2, 2 ],
-  // }
+  getNetwork: ({id}) =>
+      Api('GET', `/api/network/${id}`)
+          .done(),
+
   createNetwork: (network) =>
       Api('POST', `/api/network`)
           .body(network)
           .done(),
 
-  // Example:
-  // { url: 'net1.com' }
-  deleteNetwork: (url) =>
+  deleteNetwork: (networkID) =>
       Api('DELETE', `/api/network`)
-          .body({url})
+          .body(networkID)
           .done(),
 
 
@@ -29,48 +24,38 @@ const api = {
   listUsers: () =>
       Api('GET', `/api/user`).done(),
 
-  // Example:
-  // {
-  //     nickname: '',
-  //     role: 'user',
-  //     organization: 'org1.net1.com',
-  //     network: 'net1.com',
-  // }
   createUser: (user) =>
       Api('POST', `/api/user`)
           .body(user)
           .done(),
 
-  // Example:
-  // { url: 'User1@org1.net1.com' }
-  deleteUser: (url) =>
+  deleteUser: (userID) =>
       Api('DELETE', `/api/user`)
-          .body({url})
+          .body(userID)
           .done(),
 
-  // Example:
-  // { networkUrl: 'net1.com' }
-  listOrganizationsByNetwork: (networkUrl) =>
-      Api('GET', `/api/organization`)
-          .query({networkUrl})
+  listUsersByNetwork: (networkID) =>
+      Api('GET', `/api/user`)
+          .query(networkID)
           .done(),
 
 
   // ==================== channel ====================
+  getChannel: ({id}) =>
+      Api('GET', `/api/channel/${id}`)
+          .done(),
+
   listChannels: () =>
       Api('GET', `/api/channel`).done(),
 
-  // Example:
-  // {
-  //     network: 'net1.com',
-  //     organizations: [
-  //         'org1.net1.com',
-  //         'org2.net1.com',
-  //     ]
-  // },
   createChannel: (channel) =>
       Api('POST', `/api/channel`)
           .body(channel)
+          .done(),
+
+  listChannelsByNetwork: (networkID) =>
+      Api('GET', `/api/channel`)
+          .query(networkID)
           .done(),
 
 
@@ -78,22 +63,58 @@ const api = {
   listOrganizations: () =>
       Api('GET', `/api/organization`).done(),
 
-  // Example:
-  // {
-  //    networkUrl: 'net1.com',
-  //    peerCount: 2,
-  // }
   createOrganization: (organization) =>
       Api('POST', `/api/organization`)
           .body(organization)
           .done(),
 
-  // this feature is dead
-  // // Example:
-  // // { url: 'org1.net1.com' }
-  // deleteOrganization: (url) =>
-  //     Api('DELETE', `/api/organization`)
-  //         .body({url}),
+  listOrganizationsByNetwork: (networkID) =>
+      Api('GET', `/api/organization`)
+          .query(networkID)
+          .done(),
+
+
+  // ==================== chaincode ====================
+  listChaincodes: () =>
+      Api('GET', `/api/chaincode`).done(),
+
+  listChaincodesByNetwork: (networkID) =>
+      Api('GET', `/api/chaincode`)
+          .query(networkID)
+          .done(),
+
+  // TODO: handle the proxy error
+  // [HPM] Error occurred while trying to proxy request /api/chaincode from localhost:3000 to http://k8s:32323/ (ECONNRESET) (https://nodejs.org/api/errors.html#errors_common_system_errors)I
+  createChaincode: (chaincode) =>
+      Api('POST', `/api/chaincode`)
+          .body(chaincode)
+          .done(),
+
+  invokeChaincode: (invokeReq) =>
+      Api('POST', `/api/chaincode/transaction`)
+          .body(invokeReq)
+          .done(),
+
+  listChaincodeTransactions: () =>
+      Api('GET', `/api/chaincode/transaction`)
+          .done(),
+
+  getChaincodeTransaction: ({id}) =>
+      Api('GET', `/api/chaincode/transaction/${id}`)
+          .done(),
+
+  deleteChaincodeTransaction: (ids) =>
+      Api('DELETE', `/api/chaincode/transaction/`)
+          .body(ids)
+          .done(),
+
+
+  // ==================== peer ====================
+
+  listPeersByOrganization: (organizationID) =>
+      Api('GET', `/api/peer`)
+          .query(organizationID)
+          .done(),
 }
 
 export default api;
