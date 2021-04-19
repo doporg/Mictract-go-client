@@ -367,7 +367,6 @@ export const models = {
             title: '参数',
             render: value => {
                 const getTag = (arg, idx) => {
-                    console.log(arg, idx);
                     if (idx === 0)
                         return <Tag color='red' key={arg}> { arg } </Tag>;
                     return <Tag key={arg}> { arg } </Tag>;
