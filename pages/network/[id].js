@@ -118,7 +118,7 @@ const NetworkDetailPage = () => {
                 <Card title={"内存使用情况"} type={'inner'}>
                     <NetworkMonitorChart
                         id={`${networkID}-mem`}
-                        query={'container_memory_usage_bytes{namespace="default", pod=~".*?net5.*", id!~".*?docker.*"}'}
+                        query={`container_memory_usage_bytes{namespace="default", pod=~".*?net${networkID}.*", id!~".*?docker.*"}`}
                         useByteFormatter
                     />
                 </Card>
@@ -128,7 +128,7 @@ const NetworkDetailPage = () => {
                 <Card title={"CPU 使用情况"} type={'inner'}>
                     <NetworkMonitorChart
                         id={`${networkID}-cpu`}
-                        query={'container_cpu_usage_seconds_total{namespace="default", pod=~".*?net5.*", id!~".*?docker.*"}'}
+                        query={`container_cpu_usage_seconds_total{namespace="default", pod=~".*?net${networkID}.*", id!~".*?docker.*"}`}
                     />
                 </Card>
             </Col>
