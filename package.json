@@ -27,7 +27,8 @@
     "react-copy-to-clipboard": "^5.0.2",
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "16.13.1",
-    "rxjs": "^6.6.6"
+    "rxjs": "^6.6.6",
+    "echarts": "^5.1.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.12.13",
