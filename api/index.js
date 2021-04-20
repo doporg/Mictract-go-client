@@ -115,6 +115,19 @@ const api = {
       Api('GET', `/api/peer`)
           .query(organizationID)
           .done(),
+
+
+  // ==================== peer ====================
+
+  monitorByQuery: (query) =>
+      Api('GET', `/monitor/query`)
+          .query(query)
+          .done(),
+
+  monitorByQueryRange: (query) =>
+      Api('GET', `/monitor/query_range`)
+          .query(query)
+          .done(),
 }
 
 export default api;

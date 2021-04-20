@@ -8,6 +8,7 @@ import api from "api";
 import * as R from "ramda";
 import moment from "moment";
 import ComponentLoader from "components/ComponentLoader/ComponentLoader";
+import NetworkMonitorChart from "components/Network/NetworkMonitorChart/NetworkMonitorChart";
 
 const { TabPane } = Tabs;
 
@@ -111,9 +112,32 @@ const NetworkDetailPage = () => {
         </Row>
     );
 
+    const renderNetworkMonitor = () => (
+        <Row gutter={[24, 18]} style={{ marginTop: '32px' }}>
+            <Col span={24}>
+                <Card title={"内存使用情况"} type={'inner'}>
+                    <NetworkMonitorChart
+                        id={`${networkID}-mem`}
+                        query={'container_memory_usage_bytes{namespace="default", pod=~".*?net5.*", id!~".*?docker.*"}'}
+                        useByteFormatter
+                    />
+                </Card>
+            </Col>
+
+            <Col span={24}>
+                <Card title={"CPU 使用情况"} type={'inner'}>
+                    <NetworkMonitorChart
+                        id={`${networkID}-cpu`}
+                        query={'container_cpu_usage_seconds_total{namespace="default", pod=~".*?net5.*", id!~".*?docker.*"}'}
+                    />
+                </Card>
+            </Col>
+        </Row>
+    );
+
     return (
         <MenuLayout>
-            <ComponentLoader isLoading={ networkIsLoading }>
+            <ComponentLoader isLoading={ false }>
                 <PageHeader
                     onBack={() => window.history.back()}
                     title="网络详情"
@@ -122,9 +146,9 @@ const NetworkDetailPage = () => {
                         renderStatusTag(network.status),
                     ]}
                     footer={
-                        <Tabs defaultActiveKey="1">
+                        <Tabs defaultActiveKey="2">
                             <TabPane tab="详细信息" key="1"> { networkIsLoading? '': renderDetailTab() } </TabPane>
-                            <TabPane tab="监控信息" key="2" />
+                            <TabPane tab="监控信息" key="2"> { renderNetworkMonitor() } </TabPane>
                         </Tabs>
                     }
                 >

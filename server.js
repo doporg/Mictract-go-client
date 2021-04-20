@@ -9,6 +9,13 @@ const devProxy = {
         pathRewrite: {
             '^/api/': '/api/'
         },
+    },
+    '/monitor/': {
+        target: 'http://k8s:30500/',
+        changeOrigin: true,
+        pathRewrite: {
+            '^/monitor/': '/api/v1/'
+        },
     }
 };
 
