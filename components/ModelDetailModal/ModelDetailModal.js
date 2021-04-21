@@ -2,6 +2,16 @@ import {Descriptions, Modal} from "antd";
 
 const ModelDetailModal = ({ model, visible, record, onCancel }) => {
     if (!visible) return '';
+    const seekProperty = (record, path) => {
+        if (!Array.isArray(path)) return record[path];
+
+        for (const elem of path) {
+            if (!record.hasOwnProperty(elem))
+                return undefined;
+            record = record[elem];
+        }
+        return record;
+    };
 
     return (
         <Modal
@@ -14,7 +24,7 @@ const ModelDetailModal = ({ model, visible, record, onCancel }) => {
                 {
                     model
                         .map(col => {
-                            const value = record[col.dataIndex];
+                            const value = seekProperty(record, col.dataIndex);
                             const render = col?.render ?? ( x => x );
 
                             return <Descriptions.Item label={col.title}> { render(value, record) } </Descriptions.Item>
