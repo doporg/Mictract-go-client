@@ -59,11 +59,11 @@ export const handleErrorWithMessage = (error, option = {
 export const interactWithMessage = (reqPromiseFn, _message = 'request') => {
     return async () => {
         const key = moment().valueOf();
-        message.loading({content: 'loading', key});
+        message.loading({content: '加载中', key});
 
         try {
             await reqPromiseFn();
-            message.success({content: 'success', key});
+            message.success({content: '成功', key});
         } catch (error) {
             handleErrorWithMessage(error, {
                 message: _message,
