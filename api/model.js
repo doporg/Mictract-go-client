@@ -1,5 +1,5 @@
 import * as R from "ramda";
-import {Badge, Tag} from "antd";
+import {Badge, Descriptions, Modal, Tag} from "antd";
 import moment from "moment";
 
 export const models = {
@@ -386,6 +386,7 @@ export const models = {
             dataIndex: 'message',
             title: '消息',
             isDetailInformation: true,
+            render: value => atob(value),
         },
         {
             key: 'userID',
@@ -434,35 +435,94 @@ export const models = {
     block: [
         {
             key: 'number',
-            dataIndex: [ 'header', 'number' ],
+            dataIndex: [ 'rawBlock', 'header', 'number' ],
             title: '块号',
             render: value => value || '0'
         },
         {
             key: 'dataHash',
-            dataIndex: [ 'header', 'data_hash' ],
+            dataIndex: [ 'rawBlock', 'header', 'data_hash' ],
             title: '块内容 Hash'
         },
         {
             key: 'previousHash',
-            dataIndex: [ 'header', 'previous_hash' ],
+            dataIndex: [ 'rawBlock', 'header', 'previous_hash' ],
             title: '前向块头 Hash',
             render: value => value || '无'
         },
-        {
-            key: 'metadata',
-            dataIndex: ['metadata', 'metadata'],
-            title: '元数据',
-            isDetailInformation: true,
-            render: metadataList => metadataList.map(metadata => (<><Tag>{metadata || '空'}</Tag><br /></>)),
-        },
+        // {
+        //     key: 'metadata',
+        //     dataIndex: [ 'rawBlock', 'metadata', 'metadata' ],
+        //     title: '元数据',
+        //     isDetailInformation: true,
+        //     isArray: true,
+        //     // render: metadataList => metadataList.map(metadata => (<><Tag style={{whiteSpace: 'pre-wrap'}}>{metadata || '空'}</Tag><br /></>)),
+        // },
         {
             key: 'data',
-            dataIndex: ['data', 'data'],
+            dataIndex: 'data',
             title: '数据',
             isDetailInformation: true,
-            render: dataList => dataList.map(data => (<><Tag>{data}</Tag><br /></>)),
-            // render: dataList => dataList.map(data => (<><Tag style={{whiteSpace: 'pre-wrap'}}>{data}</Tag><br /></>)),
+            isArray: true,
+            columns: [
+                {
+                    key: 'key',
+                    dataIndex: 'key',
+                    title: '索引'
+                },
+                {
+                    key: 'headerType',
+                    dataIndex: [ 'ChannelHeader', 'type' ],
+                    title: '头类型',
+                    render: value => {
+                        const headerType = [
+                            'MESSAGE',
+                            'CONFIG',
+                            'CONFIG_UPDATE',
+                            'ENDORSER_TRANSACTION',
+                            'ORDERER_TRANSACTION',
+                            'DELIVER_SEEK_INFO',
+                            'CHAINCODE_PACKAGE'
+                        ];
+
+                        return <Tag color={'red'}>{headerType[value] || 'UNKNOWN'}</Tag>
+                    }
+                },
+                {
+                    key: 'timestamp',
+                    dataIndex: [ 'ChannelHeader', 'timestamp', 'seconds' ],
+                    title: '时间戳'
+                },
+                {
+                    key: 'channelID',
+                    dataIndex: [ 'ChannelHeader', 'channel_id' ],
+                    title: '通道ID',
+                    render: value => <Tag color={'green'}> { value || '无' } </Tag>,
+                },
+                {
+                    key: 'txID',
+                    dataIndex: [ 'ChannelHeader', 'tx_id' ],
+                    title: '交易ID',
+                    render: value => <Tag color={'purple'}> { value || '无' } </Tag>,
+                },
+                {
+                    key: 'extension',
+                    dataIndex: [ 'ChannelHeader', 'extension' ],
+                    title: '扩展信息',
+                    render: value => value || '无'
+                },
+                {
+                    key: 'MSP_ID',
+                    dataIndex: 'MSPID',
+                    title: 'MSP ID',
+                },
+                {
+                    key: 'creator',
+                    dataIndex: 'Creator',
+                    title: '创建者证书',
+                    render: value => <Tag style={{ whiteSpace: 'pre-wrap', lineHeight: '1', fontSize: '10px' }}>{value}</Tag>
+                },
+            ],
         },
     ]
 };
