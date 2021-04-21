@@ -430,6 +430,41 @@ export const models = {
             )
         },
     ],
+
+    block: [
+        {
+            key: 'number',
+            dataIndex: [ 'header', 'number' ],
+            title: '块号',
+            render: value => value || '0'
+        },
+        {
+            key: 'dataHash',
+            dataIndex: [ 'header', 'data_hash' ],
+            title: '块内容 Hash'
+        },
+        {
+            key: 'previousHash',
+            dataIndex: [ 'header', 'previous_hash' ],
+            title: '前向块头 Hash',
+            render: value => value || '无'
+        },
+        {
+            key: 'metadata',
+            dataIndex: ['metadata', 'metadata'],
+            title: '元数据',
+            isDetailInformation: true,
+            render: metadataList => metadataList.map(metadata => (<><Tag>{metadata || '空'}</Tag><br /></>)),
+        },
+        {
+            key: 'data',
+            dataIndex: ['data', 'data'],
+            title: '数据',
+            isDetailInformation: true,
+            render: dataList => dataList.map(data => (<><Tag>{data}</Tag><br /></>)),
+            // render: dataList => dataList.map(data => (<><Tag style={{whiteSpace: 'pre-wrap'}}>{data}</Tag><br /></>)),
+        },
+    ]
 };
 
 export const modelColumns =

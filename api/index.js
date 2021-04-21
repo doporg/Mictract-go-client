@@ -117,7 +117,13 @@ const api = {
           .done(),
 
 
-  // ==================== peer ====================
+  // ==================== monitor ====================
+  listBlocksByChannelIdWithPage: (channelIDWithPage) =>
+      Api('GET', `/api/block`)
+          .query(channelIDWithPage)
+          .done(),
+
+  // ==================== monitor ====================
 
   monitorByQuery: (query) =>
       Api('GET', `/monitor/query`)
