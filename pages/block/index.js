@@ -59,10 +59,10 @@ const BlockPage = () => {
         dataIndex: 'actions',
         title: '操作',
         render: (_, record) => {
-            const dataHash = record.header.data_hash;
+            const dataHash = record.rawBlock.header.data_hash;
             return (
                 <Button.Group key={dataHash}>
-                    <Button onClick={() => handleShowDetailModal(record)}>更多</Button>
+                    <Button onClick={() => handleShowDetailModal(record)}>查看</Button>
                 </Button.Group>
             );
         }
@@ -108,10 +108,12 @@ const BlockPage = () => {
             </MenuLayout>
 
             <ModelDetailModal
+                containsArray
                 model={models.block}
                 visible={modalVisible}
                 record={modalRecord}
                 onCancel={() => setModalVisible(false)}
+                width={1500}
             />
         </>
     );

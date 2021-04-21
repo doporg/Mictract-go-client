@@ -146,7 +146,7 @@ const NetworkDetailPage = () => {
                         renderStatusTag(network.status),
                     ]}
                     footer={
-                        <Tabs defaultActiveKey="2">
+                        <Tabs defaultActiveKey="1">
                             <TabPane tab="详细信息" key="1"> { networkIsLoading? '': renderDetailTab() } </TabPane>
                             <TabPane tab="监控信息" key="2"> { renderNetworkMonitor() } </TabPane>
                         </Tabs>
