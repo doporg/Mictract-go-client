@@ -1,5 +1,6 @@
 import {ApartmentOutlined, DeploymentUnitOutlined, HomeOutlined, UserOutlined} from "@ant-design/icons";
 
+// TODO: icons
 const rawMenus = [
     { key: 'index', title: '首页', path: '/', icon: <HomeOutlined /> },
 
@@ -19,6 +20,9 @@ const rawMenus = [
     { key: 'chaincode', title: '链码管理', icon: <ApartmentOutlined /> },
     { key: 'chaincode-list', parentKey: "chaincode", title: '链码列表', path: '/chaincode' },
     { key: 'chaincode-transction-list', parentKey: "chaincode", title: '链码交易', path: '/chaincode/transaction' },
+
+    { key: 'block', title: '区块查询', icon: <ApartmentOutlined /> },
+    { key: 'block-list', parentKey: "block", title: '区块列表', path: '/block' },
 ];
 
 const getMenusWithChildren = (rawMenus) => {
